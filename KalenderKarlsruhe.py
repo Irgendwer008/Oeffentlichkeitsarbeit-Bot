@@ -34,8 +34,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
 
     # Waiting for page loading
     WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, "reform")))
-    print(driver.current_url)
-
+    
 
     # Filling out form
 

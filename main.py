@@ -18,12 +18,11 @@ if __name__ == "__main__":
     details = Veranstaltungsdetails(VERANSTALTUNG_NAME = "Test-Event", 
                                     VERANSTALTUNG_UNTERÜBERSCHRIFT = "Dies ist die Unterüberschrift",
                                     VERANSTALTUNG_BESCHREIBUNG = "Dies ist eine Test-Veranstaltung des Z10 e.V. zum Testen des Veranstaltungskalenders Karlsruhe", # Optional
-                                    VERANSTALTUNG_BEGINN = datetime(2024, 10, 31, 20, 0),
-                                    VERANSTALTUNG_ENDE = datetime(2024, 10, 31, 23, 59),
+                                    VERANSTALTUNG_BEGINN = datetime(2024, 10, 31, 20, 15).replace(second=0, microsecond=0),
+                                    VERANSTALTUNG_ENDE = datetime(2024, 10, 31, 23, 59).replace(second=0, microsecond=0),
                                     VERANSTALTUNG_BILD_DATEIPFAD = abspath("image.jpg"))
     
     #TODO: check for valid inputs: future date, locale (datepicker nebenan.de)
-    #TODO: Make Nebenan.de time selection functional
     #TODO: Make Nebenan.de category functional
     #TODO: Notify that time for Nebenan.de will be cut to nearest half hour
             

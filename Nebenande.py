@@ -8,10 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
-from helper import Veranstaltungsdetails
+from helper import Veranstaltungsdetails, round_nearest_30min
 from credentials import _Logindaten
-
-
 
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
     
@@ -52,6 +50,9 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_elements(By.CLASS_NAME, "dYCQE7YIdld3Hla7RBuT")[2])).click()
     
+    
+    # Filling out Form
+    
     ## Titel und Veranstaltungsort
     elements = driver.find_elements(By.TAG_NAME, "input")
     elements[0].send_keys(details.VERANSTALTUNG_NAME)
@@ -73,7 +74,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
             pass
     
     ## Beginn: Uhrzeit
-    Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text("20:00")
+    Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text(round_nearest_30min(details.VERANSTALTUNG_BEGINN).strftime("%H:%M"))
     
     ## Ende
     if (details.VERANSTALTUNG_ENDE is not None):
@@ -94,7 +95,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
                 pass
         
         ## Ende: Uhrzeit
-        Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text("23:30")    
+        Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.VERANSTALTUNG_ENDE, True).strftime("%H:%M"))    
     
     ## Beschreibung
     driver.find_element(By.TAG_NAME, "textarea").send_keys(details.VERANSTALTUNG_BESCHREIBUNG)

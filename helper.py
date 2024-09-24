@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @dataclass
 class Veranstaltungsdetails:
@@ -20,3 +20,18 @@ class Veranstaltungsdetails:
                                                     #7 = Messen, Kongresse
                                                     #6 = Stadtleben
                                                     #14 = Sport
+                                                    
+def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
+    """Rounds time to nearest half hour
+
+    Args:
+        dtobj (datetime): Datetime to be rounded
+        earlier (bool, optional): Whether the time should be rounded up (-> Later, False) or down (-> Earlier, True). Defaults to False.
+
+    Returns:
+        datetime: resulting datetime
+    """
+    
+    result = dtobj.replace(minute=30 - 30 * earlier)
+    result += timedelta(minutes=dtobj.minute - dtobj.minute % 30)
+    return result
