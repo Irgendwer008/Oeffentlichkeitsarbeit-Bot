@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,8 +10,6 @@ from selenium.common.exceptions import NoSuchElementException
 
 from helper import Veranstaltungsdetails
 from credentials import _Logindaten
-
-
 
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
     
@@ -54,17 +53,17 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
         driver.find_element(By.ID, "reformField4").send_keys(details.VERANSTALTUNG_BESCHREIBUNG)
 
     ## Beginn der Veranstaltung: Datum
-    driver.find_element(By.ID, "reformField5-dt").send_keys(details.VERANSTALTUNG_BEGINN_DATUM)
+    driver.find_element(By.ID, "reformField5-dt").send_keys(details.VERANSTALTUNG_BEGINN.strftime("%Y-%m-%d"))
 
     ## Beginn der Veranstaltung: Uhrzeit
-    driver.find_element(By.ID, "reformField5-tm").send_keys(details.VERANSTALTUNG_BEGINN_ZEIT)
+    driver.find_element(By.ID, "reformField5-tm").send_keys(details.VERANSTALTUNG_BEGINN.strftime("%H:%M"))
 
-    if (details.VERANSTALTUNG_ENDE_DATUM != "" and details.VERANSTALTUNG_ENDE_ZEIT != ""):
+    if (details.VERANSTALTUNG_ENDE is not None):
         ## Ende der Veranstaltung: Datum
-        driver.find_element(By.ID, "reformField6-dt").send_keys(details.VERANSTALTUNG_ENDE_DATUM)
+        driver.find_element(By.ID, "reformField6-dt").send_keys(details.VERANSTALTUNG_ENDE.strftime("%Y-%m-%d"))
 
         ## Ende der Veranstaltung: Uhrzeit
-        driver.find_element(By.ID, "reformField6-tm").send_keys(details.VERANSTALTUNG_ENDE_ZEIT)
+        driver.find_element(By.ID, "reformField6-tm").send_keys(details.VERANSTALTUNG_ENDE.strftime("%H:%M"))
 
     ## Veranstalungsort
     driver.find_element(By.ID, "reformField8_chosen").find_element(By.CLASS_NAME, "chosen-single").click()

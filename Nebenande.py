@@ -59,17 +59,15 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     
     ## Beginn: Tag
     elements[2].click()
-    timeobj = datetime.strptime(details.VERANSTALTUNG_BEGINN_DATUM, "%Y-%m-%d")
         
     locale.setlocale(locale.LC_TIME, "de_DE.UTF8")    
     
-    while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text[-4:] != str(timeobj.year) or 
-           driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text[:-5] != timeobj.strftime("%B")):
+    while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.VERANSTALTUNG_BEGINN.strftime("%B %Y")):
         driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
         
     for datebutton in driver.find_elements(By.TAG_NAME, "td"):
         try:
-            datebutton.find_element(By.XPATH, "//span[text()='" + str(timeobj.day) + "']").click()
+            datebutton.find_element(By.XPATH, "//span[text()='" + str(details.VERANSTALTUNG_BEGINN.day) + "']").click()
             break
         except NoSuchElementException:
             pass
@@ -78,21 +76,19 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text("20:00")
     
     ## Ende
-    if (details.VERANSTALTUNG_ENDE_DATUM != "" and details.VERANSTALTUNG_ENDE_ZEIT != ""):
+    if (details.VERANSTALTUNG_ENDE is not None):
         
         driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/article[2]/ul/li/span").click()
         driver.find_elements(By.TAG_NAME, "input")[3].click()
         
-        ## Ende: Tag
-        timeobj = datetime.strptime(details.VERANSTALTUNG_ENDE_DATUM, "%Y-%m-%d")   
+        ## Ende: Tag 
         
-        while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text[-4:] != str(timeobj.year) or 
-            driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text[:-5] != timeobj.strftime("%B")):
+        while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.VERANSTALTUNG_BEGINN.strftime("%B %Y")):
             driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
             
         for datebutton in driver.find_elements(By.TAG_NAME, "td"):
             try:
-                datebutton.find_element(By.XPATH, "//span[text()='" + str(timeobj.day) + "']").click()
+                datebutton.find_element(By.XPATH, "//span[text()='" + str(details.VERANSTALTUNG_BEGINN.day) + "']").click()
                 break
             except NoSuchElementException:
                 pass

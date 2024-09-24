@@ -1,15 +1,14 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 @dataclass
 class Veranstaltungsdetails:
     VERANSTALTUNG_NAME: str 
     VERANSTALTUNG_UNTERÜBERSCHRIFT: str 
     VERANSTALTUNG_BESCHREIBUNG: str  # Optional
-    VERANSTALTUNG_BEGINN_DATUM: str # Format: yyyy-mm-dd
-    VERANSTALTUNG_BEGINN_ZEIT: str # Format: hh:mm
+    VERANSTALTUNG_BEGINN: datetime
     VERANSTALTUNG_BILD_DATEIPFAD: str
-    VERANSTALTUNG_ENDE_DATUM: str = "" # Format: yyyy-mm-dd
-    VERANSTALTUNG_ENDE_ZEIT: str = "" # Format: hh:mm
+    VERANSTALTUNG_ENDE: datetime = None
     VERANSTALTUNG_ORT: str = "Zähringerstraße 10"
     VERANSTALTUNG_LINK: str = "https://z10.info"
     VERANSTALTUNG_BEREICH: str = "1444" # Optional: #1444 = Musik
