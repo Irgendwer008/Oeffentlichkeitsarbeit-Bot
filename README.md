@@ -22,9 +22,9 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 
 ### Currently fully working plugins:
 - KalenderKarlsruhe
+- Nebenan.de
 
 ### Currently mostly working plugins:
-- Nebenan.de (category functionality missing, always "Kunst, Kultur und Musik")
 
 ### Helpful links for further development
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
