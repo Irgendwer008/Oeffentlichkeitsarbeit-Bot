@@ -7,9 +7,12 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
+from helper import Veranstaltungsdetails
+from credentials import _Logindaten
 
 
-def run(details, credentials, driver: Firefox):
+
+def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 
