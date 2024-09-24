@@ -59,7 +59,7 @@ if __name__ == "__main__":
     credentials = _Logindaten()
     
     try:
-        #print(KalenderKarlsruhe.run(details, credentials, driver))
+        KalenderKarlsruhe.run(details, credentials, driver)
         Nebenande.run(details, credentials, driver)
     except TimeoutException:
         print("Timeout while loading a page")
