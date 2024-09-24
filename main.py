@@ -15,82 +15,83 @@ import KalenderKarlsruhe
 import Nebenande
 
 from os.path import abspath
-
-if __name__ == "__main__":
     
-    try:
-    
-        print("######################")
-        print("#                    #")
-        print("#  Z10 Autouploader  #")
-        print("#                    #")
-        print("######################")
-        
-        # Name
-        name = "Test"
-        while name == "":
-            name = input("\n# Wie lautet der Titel der Veranstaltung?: ")
-        
-        # Unterüberschrift
-        unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): ")
-        if unterüberschrift == "":
-            unterüberschrift = Veranstaltungsdetails.UNTERÜBERSCHRIFT
-        
-        # Beschreibung
-        beschreibung = "Dies ist eine Testbeschreibung"
-        while beschreibung == "":
-            beschreibung = input("\n# Wie lautet die Beschreibung der Veranstaltung?: ")
-        
-        """
-        # Veranstaltungsbegin
-        while (True):
-            try:
-                veranstaltungsbeginn = datetime.strptime(input("\n# Wann beginnt die Veranstaltung? (Format: 01.02.2024 17:42): "), "%d.%m.%Y %H:%M")
-                if veranstaltungsbeginn < datetime.now():
-                    raise Exception
-                break
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt
-            except:
-                print("\n!! Deine Eingabe hat das falsche Format oder liegt in der Vergangenheit! Bitte gib Datum und Uhrzeit anhand des Beispiels an.")
-        
-        # Veranstaltungsende
-        veranstaltungsende = None
-        
-        while (True):
-            
-            string = input("\n# Wann endet die Veranstaltung? Lasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat. (Format: 01.02.2024 17:42): ")
-                        
-            if string == "":
-                break
-            
-            try:
-                veranstaltungsende = datetime.strptime(string, "%d.%m.%Y %H:%M")
-                if veranstaltungsende < veranstaltungsbeginn:
-                    raise Exception
-                break
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt
-            except:
-                print("\n!! Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest.")
-        """
-        veranstaltungsbeginn = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M")
-        veranstaltungsende = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M")
-        
-        if veranstaltungsbeginn.minute % 30 != 0:
-            print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die Angegebenen Uhrzeiten werden gerundet auf " + round_nearest_30min(veranstaltungsbeginn).strftime("%H:%M"), end="")
+#TODO: check for valid values: locale (datepicker nebenan.de)
+#TODO: Make Nebenan.de category functional
+#TODO: Allow choosing of which plugins to use
+#TODO: Check if events where published correctly (prob takes much time :,) )
+#TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
 
-            if veranstaltungsende is not None and veranstaltungsende.minute % 30 != 0:
-                print(" bzw. " + round_nearest_30min(veranstaltungsende, True).strftime("%H:%M"), end="")
-            
-            print("")
+def get_name() -> str:
+    name = "Test"
+    while name == "":
+        name = input("\n# Wie lautet der Titel der Veranstaltung?: ")
+    return name
         
+def get_unterüberschrift() -> str:
+    unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): ")
+    if unterüberschrift == "":
+        unterüberschrift = Veranstaltungsdetails.UNTERÜBERSCHRIFT
+    return unterüberschrift
         
-        # Bild
-        filepath = "image.jpg" # input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: ")
-            
-        while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
-            filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
+def get_beschreibung() -> str:
+    beschreibung = "Dies ist eine Testbeschreibung"
+    while beschreibung == "":
+        beschreibung = input("\n# Wie lautet die Beschreibung der Veranstaltung?: ")
+    return beschreibung
+
+def get_beginn() -> datetime:
+    while (True):
+        try:
+            veranstaltungsbeginn = datetime.strptime(input("\n# Wann beginnt die Veranstaltung? (Format: 01.02.2024 17:42): "), "%d.%m.%Y %H:%M")
+            if veranstaltungsbeginn < datetime.now():
+                raise Exception
+            break
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
+        except:
+            print("\n!! Deine Eingabe hat das falsche Format oder liegt in der Vergangenheit! Bitte gib Datum und Uhrzeit anhand des Beispiels an.")
+    return veranstaltungsbeginn
+
+def get_ende(veranstaltungsbeginn) -> datetime:
+    veranstaltungsende = None
+    while (True):
+        
+        string = input("\n# Wann endet die Veranstaltung? Lasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat. (Format: 01.02.2024 17:42): ")
+                    
+        if string == "":
+            break
+        
+        try:
+            veranstaltungsende = datetime.strptime(string, "%d.%m.%Y %H:%M")
+            if veranstaltungsende < veranstaltungsbeginn:
+                raise Exception
+            break
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
+        except:
+            print("\n!! Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest.")
+    return veranstaltungsende
+
+def notify_of_rounded_times(beginn: datetime, ende: datetime):
+    if beginn.minute % 30 != 0:
+        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die Angegebenen Uhrzeiten werden gerundet auf " + round_nearest_30min(beginn).strftime("%H:%M"), end="")
+
+        if ende is not None and ende.minute % 30 != 0:
+            print(" bzw. " + round_nearest_30min(ende, True).strftime("%H:%M"), end="")
+        
+        print("")
+    return
+
+def get_bild() -> str:
+    filepath = "image.jpg" # input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: ")
+        
+    while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
+        filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
+    return abspath(filepath)
+"""
+def get_kategorien():
+    
             
         # Kategorien
         default_categories = ""
@@ -106,27 +107,29 @@ if __name__ == "__main__":
                 # Nebenande
                 
                 category_kalenderkarlsruhe = input("")
-        
-        
-            
+"""
+
+if __name__ == "__main__":
+    
+    plugins = [KalenderKarlsruhe, Nebenande]
+    
+    print("######################")
+    print("#                    #")
+    print("#  Z10 Autouploader  #")
+    print("#                    #")
+    print("######################")
+    
+    try:
+        details = Veranstaltungsdetails(NAME = get_name(), 
+                                        UNTERÜBERSCHRIFT = get_unterüberschrift(),
+                                        BESCHREIBUNG = get_beschreibung(),
+                                        BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"), # get_beginn(),
+                                        ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"), # get_ende(veranstaltungsbeginn),
+                                        BILD_DATEIPFAD = get_bild())  
+        notify_of_rounded_times()   
     except KeyboardInterrupt:
-        print("\n\nProgramm wird beendet. Die Veranstaltung wird nicht veröffentlicht.\n")
+        print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
-    
-    # Done
-    details = Veranstaltungsdetails(NAME = name, 
-                                    UNTERÜBERSCHRIFT = unterüberschrift,
-                                    BESCHREIBUNG = beschreibung,
-                                    BEGINN = veranstaltungsbeginn,
-                                    ENDE = veranstaltungsende,
-                                    BILD_DATEIPFAD = abspath(filepath))
-    
-    #TODO: check for valid values: locale (datepicker nebenan.de)
-    #TODO: Make Nebenan.de category functional
-    #TODO: Allow choosing of which plugins to use
-    #TODO: Check if events where published correctly (prob takes much time :,) )
-    #TODO: Make all the input question their own functions
-    #TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
             
     options = Options()
     #options.add_argument("--headless")
@@ -134,9 +137,7 @@ if __name__ == "__main__":
     driver = Firefox(options=options)
     
     # Import login credentials
-    credentials = _Logindaten()
-    
-    plugins = [KalenderKarlsruhe, Nebenande]
+    credentials = _Logindaten
     
     try:
         lastsuccesful = 0
