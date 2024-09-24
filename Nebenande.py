@@ -48,18 +48,18 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
 
     # Open dialogue
     
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_elements(By.CLASS_NAME, "dYCQE7YIdld3Hla7RBuT")[2])).click()
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located(driver.find_element(By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
     
     
     # Filling out Form
     
     ## Titel und Veranstaltungsort
-    elements = driver.find_elements(By.TAG_NAME, "input")
-    elements[0].send_keys(details.NAME)
-    elements[1].send_keys(details.ORT)
+    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(
+        driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Name der Veranstaltung"]'))).send_keys(details.NAME)
+    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Ort der Veranstaltung"]').send_keys(details.ORT)
     
     ## Beginn: Tag
-    elements[2].click()
+    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Tag"]').click()
         
     locale.setlocale(locale.LC_TIME, "de_DE.UTF8")    
     
@@ -98,7 +98,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
         Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.ENDE, True).strftime("%H:%M"))    
     
     ## Beschreibung
-    driver.find_element(By.TAG_NAME, "textarea").send_keys(details.BESCHREIBUNG)
+    driver.find_element(By.CSS_SELECTOR, "textarea[placeholder=\"Deine Veranstaltungsbeschreibung\"]").send_keys(details.BESCHREIBUNG)
     
     ## Bild
     driver.find_element(By.CLASS_NAME, "c-file_picker-input").send_keys(details.BILD_DATEIPFAD)
@@ -108,7 +108,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     ## Kategorie
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(details.KATEGORIE_NEBENANDE + 1) + "]"))).click()
-        
+            
     ## Submit
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
     

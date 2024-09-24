@@ -26,7 +26,7 @@ if __name__ == "__main__":
         print("######################")
         
         # Name
-        name = ""
+        name = "Test"
         while name == "":
             name = input("\n# Wie lautet der Titel der Veranstaltung?: ")
         
@@ -36,10 +36,11 @@ if __name__ == "__main__":
             unterüberschrift = Veranstaltungsdetails.UNTERÜBERSCHRIFT
         
         # Beschreibung
-        beschreibung = ""
+        beschreibung = "Dies ist eine Testbeschreibung"
         while beschreibung == "":
             beschreibung = input("\n# Wie lautet die Beschreibung der Veranstaltung?: ")
         
+        """
         # Veranstaltungsbegin
         while (True):
             try:
@@ -57,21 +58,23 @@ if __name__ == "__main__":
         
         while (True):
             
-            string = input("\n# Wann endet die Veranstaltung?\nLasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat.\n(Format: 01.02.2024 17:42): ")
+            string = input("\n# Wann endet die Veranstaltung? Lasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat. (Format: 01.02.2024 17:42): ")
                         
             if string == "":
                 break
             
             try:
                 veranstaltungsende = datetime.strptime(string, "%d.%m.%Y %H:%M")
-                print(veranstaltungsende, veranstaltungsbeginn)
-                #if veranstaltungsende < veranstaltungsbeginn:
-                #    raise Exception
+                if veranstaltungsende < veranstaltungsbeginn:
+                    raise Exception
                 break
             except KeyboardInterrupt:
                 raise KeyboardInterrupt
             except:
                 print("\n!! Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest.")
+        """
+        veranstaltungsbeginn = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M")
+        veranstaltungsende = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M")
         
         if veranstaltungsbeginn.minute % 30 != 0:
             print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die Angegebenen Uhrzeiten werden gerundet auf " + round_nearest_30min(veranstaltungsbeginn).strftime("%H:%M"), end="")
@@ -83,7 +86,7 @@ if __name__ == "__main__":
         
         
         # Bild
-        filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: ")
+        filepath = "image.jpg" # input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: ")
             
         while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
             filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
@@ -100,7 +103,6 @@ if __name__ == "__main__":
                 # Kalender Karlsruhe
                 
                 category_kalenderkarlsruhe = input("")
-                
         
         
             
@@ -116,13 +118,13 @@ if __name__ == "__main__":
                                     ENDE = veranstaltungsende,
                                     BILD_DATEIPFAD = abspath(filepath))
     
-    exit()
-    
     #TODO: check for valid values: locale (datepicker nebenan.de)
     #TODO: Make Nebenan.de category functional
     #TODO: Allow choosing of which platforms to publish to
     #TODO: Check if events where published correctly (prob takes much time :,) )
     #TODO: Make all the input question their own functions
+    #TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
+    #TODO: track which plugin was executed last (succesfully) for better Error tracking
             
     options = Options()
     #options.add_argument("--headless")
@@ -133,10 +135,8 @@ if __name__ == "__main__":
     credentials = _Logindaten()
     
     try:
-        KalenderKarlsruhe.run(details, credentials, driver)
+        #KalenderKarlsruhe.run(details, credentials, driver)
         Nebenande.run(details, credentials, driver)
         driver.quit()
-    except TimeoutException:
-        print("Timeout while loading a page")
     except KeyboardInterrupt:
         print("\n\n!!Achtung!! Das Programm wurde während des Hochladens unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, da die Veranstaltung nirgendwo, teilweise oder bereits überall veröffentlicht sein kann!\n")
