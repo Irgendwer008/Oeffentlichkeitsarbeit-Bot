@@ -14,13 +14,12 @@ class Veranstaltungsdetails:
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
     ORT: str = "Zähringerstraße 10"
     LINK: str = "https://z10.info"
-    KATEGORIE_KALENDERKARLSRUHE: str = "1444" # Optional. For other Categories see the plugin's "pluginingo".
-    KATEGORIE_NEBENANDE: str = "2" # # Optional. For other Categories see the plugin's "pluginingo".
+    AUSGEWÄHLTE_KATEGORIE: list[str] = "1444", "2" # Optional. For other Categories see the plugin's "pluginingo".
 
 @dataclass
 class PluginInfo:
     FRIENDLYNAME: str
-    Kategorien: dict[str: str]
+    KATEGORIEN: dict[str: str]
                                                     
 def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
     """Rounds time to nearest half hour

@@ -1,23 +1,20 @@
-from dataclasses import dataclass
 from datetime import datetime
-import inspect
 from os.path import exists
 from os.path import abspath
-from os.path import expanduser
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import TimeoutException
 
 from credentials import _Logindaten
-from helper import Veranstaltungsdetails, Kategorien, round_nearest_30min, YES
-
+from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO
+    
 import KalenderKarlsruhe
 import Nebenande
+plugins = [KalenderKarlsruhe, Nebenande]
 
 from os.path import abspath
     
 #TODO: check for valid values: locale (datepicker nebenan.de)
-#TODO: Make Nebenan.de category functional
+#TODO: Make categories functional
 #TODO: Allow choosing of which plugins to use
 #TODO: Check if events where published correctly (prob takes much time :,) )
 #TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
@@ -89,11 +86,11 @@ def get_bild() -> str:
     while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
         filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
     return abspath(filepath)
+
 """
-def get_kategorien():
-    
-            
-        # Kategorien
+def get_single_category(index: int) -> str:
+    categories = plugins[index].plugininfo
+def get_kategorien() -> list[str]:
         default_categories = ""
         while True:
             default_categories = input("Sollen die Standartkategorien ("
@@ -101,7 +98,7 @@ def get_kategorien():
                 "Nebenan.de: \"" + Kategorien.NEBENANDE[Veranstaltungsdetails.KATEGORIE_NEBENANDE] + "\") beibehalten werden? [Y/n]")
             if default_categories in YES:
                 break
-            else:
+            elif default_categories in NO:
                 # Kalender Karlsruhe
                 
                 # Nebenande
@@ -111,14 +108,13 @@ def get_kategorien():
 
 if __name__ == "__main__":
     
-    plugins = [KalenderKarlsruhe, Nebenande]
-    
     print("######################")
     print("#                    #")
     print("#  Z10 Autouploader  #")
     print("#                    #")
     print("######################")
     
+    # Get event details
     try:
         details = Veranstaltungsdetails(NAME = get_name(), 
                                         UNTERÜBERSCHRIFT = get_unterüberschrift(),
@@ -126,26 +122,32 @@ if __name__ == "__main__":
                                         BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"), # get_beginn(),
                                         ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"), # get_ende(veranstaltungsbeginn),
                                         BILD_DATEIPFAD = get_bild())  
-        notify_of_rounded_times()   
+        notify_of_rounded_times(details.BEGINN, details.ENDE)   
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
-            
-    options = Options()
-    #options.add_argument("--headless")
-
-    driver = Firefox(options=options)
     
-    # Import login credentials
+    # Get login credentials
     credentials = _Logindaten
     
+    # init driver
+    options = Options()
+    #options.add_argument("--headless")
+    driver = Firefox(options=options)
+    
+    # Newline
+    print("")
+    
+    # Execute all the plugins
     try:
         lastsuccesful = 0
         for plugin in plugins:
-            plugin.run(details, credentials, driver)
+            plugin.run(details, credentials, plugins, driver)
+            print("Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht.")
             lastsuccesful += 1
         driver.quit()
     except KeyboardInterrupt:
-        print("\n\n!!Achtung!! Das Programm wurde vom Benutzer während des Hochladens auf " + plugins[lastsuccesful].__name__ + " unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders " + plugins[lastsuccesful + 1].__name__ + ", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
-    except:
-        print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf " + plugins[lastsuccesful].__name__ + " unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders " + plugins[lastsuccesful + 1].__name__ + ", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+        print("\n\n!!Achtung!! Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+    except Exception as e:
+        print(e)
+        print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")

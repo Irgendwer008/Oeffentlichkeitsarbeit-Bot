@@ -1,5 +1,5 @@
+import sys
 import time
-from datetime import datetime
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,9 +22,7 @@ plugininfo = PluginInfo("Kalender Karlsruhe",
                          "6": "Stadtleben",
                          "14": "Sport"})
 
-print(plugininfo)
-
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 
@@ -52,7 +50,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     # Filling out form
 
     ## Bereich
-    Select(driver.find_element(By.ID, "reformField1")).select_by_value(details.KATEGORIE_KALENDERKARLSRUHE)
+    Select(driver.find_element(By.ID, "reformField1")).select_by_value(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])])
 
     ## Name der Veranstaltung
     driver.find_element(By.ID, "reformField2").send_keys(details.NAME)
@@ -93,9 +91,9 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
 
 
     # Send form
-    driver.find_element(By.ID, "reformcreate$").click()
+    #driver.find_element(By.ID, "reformcreate$").click()
 
-    time.sleep(1)
+    time.sleep(10)
 
 
     # check for error messages

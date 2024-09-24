@@ -1,4 +1,5 @@
 from datetime import datetime
+import sys
 import time
 import locale
 from selenium.webdriver import Firefox
@@ -29,7 +30,7 @@ plugininfo = PluginInfo("Nebenan.de",
                          "14": "Ausflüge",
                          "15": "Sonstiges"})
 
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
     
     
     # Open Website
@@ -61,12 +62,12 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
      
     WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.TAG_NAME, "article")))
     
-    time.sleep(1)
+    time.sleep(2)
 
 
     # Open dialogue
     
-    WebDriverWait(driver, 3).until(EC.presence_of_element_located(driver.find_element(By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
     
     
     # Filling out Form
@@ -125,9 +126,11 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
         
     ## Kategorie
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + details.KATEGORIE_NEBENANDE + 1 + "]"))).click()
+    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
             
     ## Submit
-    driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
+    #driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
+    
+    time.sleep(10)
     
     return
