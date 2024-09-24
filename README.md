@@ -16,6 +16,12 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 - *.jpg
 - *.gif
 
+# Currently fully working plugins:
+- KalenderKarlsruhe
+
+# Currently mostly working plugins:
+- Nebenan.de
+
 # Helpful links for further development
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
 - [Nice overview over selenium and many of it's features](https://pythonexamples.org/python-selenium-introduction/)
