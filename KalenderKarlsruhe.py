@@ -1,21 +1,15 @@
-# from selenium import webdriver 
 import time
-from os.path import abspath
 from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
-from main import Veranstaltungsdetails, _Logindaten
 
 
-
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
+def run(details, credentials, driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 
