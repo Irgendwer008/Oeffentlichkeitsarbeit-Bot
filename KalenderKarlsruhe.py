@@ -8,8 +8,21 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
-from helper import Veranstaltungsdetails
+from helper import Veranstaltungsdetails, PluginInfo
 from credentials import _Logindaten
+
+plugininfo = PluginInfo("Kalender Karlsruhe",
+                        {"1444": "Musik",
+                         "1445": "Theater, Tanz",
+                         "1443": "Literatur, Vorträge",
+                         "13": "Kunst, Ausstellungen",
+                         "10": "Architektur, Baukultur",
+                         "450664": "Wirtschaft, Wissenschaft",
+                         "7": "Messen, Kongresse",
+                         "6": "Stadtleben",
+                         "14": "Sport"})
+
+print(plugininfo)
 
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
     
@@ -39,7 +52,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     # Filling out form
 
     ## Bereich
-    Select(driver.find_element(By.ID, "reformField1")).select_by_value(str(details.KATEGORIE_KALENDERKARLSRUHE))
+    Select(driver.find_element(By.ID, "reformField1")).select_by_value(details.KATEGORIE_KALENDERKARLSRUHE)
 
     ## Name der Veranstaltung
     driver.find_element(By.ID, "reformField2").send_keys(details.NAME)

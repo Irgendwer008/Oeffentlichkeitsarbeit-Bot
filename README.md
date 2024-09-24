@@ -26,6 +26,12 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 
 ### Currently mostly working plugins:
 
+### How to add new Plugins:
+example with "Name" as plugin name:
+- create a Name.py file that contains an object "plugininfo" of type "PluginInfo" (see helper.py) and a "run" funtion
+- Set a friendly name (i.e. "my Plugin") and an dict[str: str] of category indices and names (if applicable, else leave empty)
+- populate the run-function with code that logs into your platform and publishes the Event
+
 ### Helpful links for further development
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
 - [Nice overview over selenium and many of it's features](https://pythonexamples.org/python-selenium-introduction/)

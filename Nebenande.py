@@ -8,8 +8,26 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
-from helper import Veranstaltungsdetails, round_nearest_30min
+from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min
 from credentials import _Logindaten
+
+plugininfo = PluginInfo("Nebenan.de",
+                        {"0": "Kennenlernen & Stammtische",
+                         "1": "Bildung & Erfahrung",
+                         "2": "Kunst, Kultur & Musik",
+                         "3": "Märkte & Flohmärkte",
+                         "4": "Familien & Kinder",
+                         "5": "Essen & Trinken",
+                         "6": "Feste & Feiern",
+                         "7": "Lokales Engagement",
+                         "8": "Gestalten & Heimwerken",
+                         "9": "Gesundheit & Wellness",
+                         "10": "Sport & Bewegung",
+                         "11": "Umwelt & Nachhaltigkeit",
+                         "12": "Teilen, Tauschen, Reparieren",
+                         "13": "Viertel verschönern",
+                         "14": "Ausflüge",
+                         "15": "Sonstiges"})
 
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
     
@@ -107,7 +125,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
         
     ## Kategorie
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(details.KATEGORIE_NEBENANDE + 1) + "]"))).click()
+    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + details.KATEGORIE_NEBENANDE + 1 + "]"))).click()
             
     ## Submit
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()

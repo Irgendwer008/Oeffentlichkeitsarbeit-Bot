@@ -14,37 +14,13 @@ class Veranstaltungsdetails:
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
     ORT: str = "Zähringerstraße 10"
     LINK: str = "https://z10.info"
-    KATEGORIE_KALENDERKARLSRUHE: int = 1444 # Optional. For other Categories see class "Kategorien" below.
-    KATEGORIE_NEBENANDE: int = 2 # # Optional. For other Categories see class "Kategorien" below.
+    KATEGORIE_KALENDERKARLSRUHE: str = "1444" # Optional. For other Categories see the plugin's "pluginingo".
+    KATEGORIE_NEBENANDE: str = "2" # # Optional. For other Categories see the plugin's "pluginingo".
 
 @dataclass
-class Kategorien:
-    KALENDERKARLSRUHE = {1444: "Musik",
-                         1445: "Theater, Tanz",
-                         1443: "Literatur, Vorträge",
-                         13: "Kunst, Ausstellungen",
-                         10: "Architektur, Baukultur",
-                         450664: "Wirtschaft, Wissenschaft",
-                         7: "Messen, Kongresse",
-                         6: "Stadtleben",
-                         14: "Sport"}
-    
-    NEBENANDE = ["Kennenlernen & Stammtische",
-                 "Bildung & Erfahrung",
-                 "Kunst, Kultur & Musik",
-                 "Märkte & Flohmärkte",
-                 "Familien & Kinder",
-                 "Essen & Trinken",
-                 "Feste & Feiern",
-                 "Lokales Engagement",
-                 "Gestalten & Heimwerken",
-                 "Gesundheit & Wellness",
-                 "Sport & Bewegung",
-                 "Umwelt & Nachhaltigkeit",
-                 "Teilen, Tauschen, Reparieren",
-                 "Viertel verschönern",
-                 "Ausflüge",
-                 "Sonstiges"]
+class PluginInfo:
+    FRIENDLYNAME: str
+    Kategorien: dict[str: str]
                                                     
 def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
     """Rounds time to nearest half hour
