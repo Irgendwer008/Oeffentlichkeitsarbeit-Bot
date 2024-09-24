@@ -1,4 +1,3 @@
-import locale
 from datetime import datetime
 from os.path import abspath
 from selenium.webdriver import Firefox
