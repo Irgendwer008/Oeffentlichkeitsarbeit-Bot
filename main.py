@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+import inspect
 from os.path import exists
 from os.path import abspath
 from os.path import expanduser
@@ -102,6 +103,8 @@ if __name__ == "__main__":
             else:
                 # Kalender Karlsruhe
                 
+                # Nebenande
+                
                 category_kalenderkarlsruhe = input("")
         
         
@@ -120,11 +123,10 @@ if __name__ == "__main__":
     
     #TODO: check for valid values: locale (datepicker nebenan.de)
     #TODO: Make Nebenan.de category functional
-    #TODO: Allow choosing of which platforms to publish to
+    #TODO: Allow choosing of which plugins to use
     #TODO: Check if events where published correctly (prob takes much time :,) )
     #TODO: Make all the input question their own functions
     #TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
-    #TODO: track which plugin was executed last (succesfully) for better Error tracking
             
     options = Options()
     #options.add_argument("--headless")
@@ -134,9 +136,15 @@ if __name__ == "__main__":
     # Import login credentials
     credentials = _Logindaten()
     
+    plugins = [KalenderKarlsruhe, Nebenande]
+    
     try:
-        #KalenderKarlsruhe.run(details, credentials, driver)
-        Nebenande.run(details, credentials, driver)
+        lastsuccesful = 0
+        for plugin in plugins:
+            plugin.run(details, credentials, driver)
+            lastsuccesful += 1
         driver.quit()
     except KeyboardInterrupt:
-        print("\n\n!!Achtung!! Das Programm wurde während des Hochladens unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, da die Veranstaltung nirgendwo, teilweise oder bereits überall veröffentlicht sein kann!\n")
+        print("\n\n!!Achtung!! Das Programm wurde vom Benutzer während des Hochladens auf " + plugins[lastsuccesful].__name__ + " unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders " + plugins[lastsuccesful + 1].__name__ + ", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+    except:
+        print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf " + plugins[lastsuccesful].__name__ + " unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders " + plugins[lastsuccesful + 1].__name__ + ", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
