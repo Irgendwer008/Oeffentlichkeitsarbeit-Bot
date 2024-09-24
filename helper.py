@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 class Veranstaltungsdetails:
     VERANSTALTUNG_NAME: str 
     VERANSTALTUNG_UNTERÜBERSCHRIFT: str 
-    VERANSTALTUNG_BESCHREIBUNG: str  # Optional
+    VERANSTALTUNG_BESCHREIBUNG: str
     VERANSTALTUNG_BEGINN: datetime
     VERANSTALTUNG_BILD_DATEIPFAD: str
-    VERANSTALTUNG_ENDE: datetime = None
+    VERANSTALTUNG_ENDE: datetime = None # Optional
     VERANSTALTUNG_ORT: str = "Zähringerstraße 10"
     VERANSTALTUNG_LINK: str = "https://z10.info"
     VERANSTALTUNG_BEREICH: str = "1444" # Optional: #1444 = Musik

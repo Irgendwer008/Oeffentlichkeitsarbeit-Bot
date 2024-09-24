@@ -111,7 +111,5 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
         
     ## Submit
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
-        
-    time.sleep(60)
-
+    
     return
