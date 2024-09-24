@@ -31,9 +31,9 @@ if __name__ == "__main__":
             name = input("\n# Wie lautet der Titel der Veranstaltung?: ")
         
         # Unterüberschrift
-        unterüberschrift = ""
-        while unterüberschrift == "":
-            unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung?: ")
+        unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.VERANSTALTUNG_UNTERÜBERSCHRIFT + "'): ")
+        if unterüberschrift == "":
+            unterüberschrift = Veranstaltungsdetails.VERANSTALTUNG_UNTERÜBERSCHRIFT
         
         # Beschreibung
         beschreibung = ""
@@ -100,9 +100,12 @@ if __name__ == "__main__":
                                     VERANSTALTUNG_ENDE = veranstaltungsende,
                                     VERANSTALTUNG_BILD_DATEIPFAD = abspath(filepath))
     
+    print(details.VERANSTALTUNG_UNTERÜBERSCHRIFT)
+    
+    exit()
+    
     #TODO: check for valid values: locale (datepicker nebenan.de)
     #TODO: Make Nebenan.de category functional
-    #TODO: Make "Eine Z10 Veranstaltung" the default Unterüberschrift
             
     options = Options()
     #options.add_argument("--headless")
