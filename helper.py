@@ -1,25 +1,50 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+YES = ["Y", "y", "Yes", "yes", "Ja", "ja"]
+NO = ["N", "n", "No", "no", "Nein", "nein"]
+
 @dataclass
 class Veranstaltungsdetails:
-    VERANSTALTUNG_NAME: str 
-    VERANSTALTUNG_BESCHREIBUNG: str
-    VERANSTALTUNG_BEGINN: datetime
-    VERANSTALTUNG_BILD_DATEIPFAD: str
-    VERANSTALTUNG_ENDE: datetime = None # Optional
-    VERANSTALTUNG_UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
-    VERANSTALTUNG_ORT: str = "Zähringerstraße 10"
-    VERANSTALTUNG_LINK: str = "https://z10.info"
-    VERANSTALTUNG_BEREICH: str = "1444" # Optional: #1444 = Musik
-                                                    #1445 = Theater, Tanz
-                                                    #1443 = Literatur, Vorträge
-                                                    #13 = Kunst, Ausstellungen
-                                                    #10 = Architektur, Baukultur
-                                                    #450664 = Wirtschaft, Wissenschaft
-                                                    #7 = Messen, Kongresse
-                                                    #6 = Stadtleben
-                                                    #14 = Sport
+    NAME: str 
+    BESCHREIBUNG: str
+    BEGINN: datetime
+    BILD_DATEIPFAD: str
+    ENDE: datetime = None # Optional
+    UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
+    ORT: str = "Zähringerstraße 10"
+    LINK: str = "https://z10.info"
+    KATEGORIE_KALENDERKARLSRUHE: int = 1444 # Optional. For other Categories see class "Kategorien" below.
+    KATEGORIE_NEBENANDE: int = 2 # # Optional. For other Categories see class "Kategorien" below.
+
+@dataclass
+class Kategorien:
+    KALENDERKARLSRUHE = {1444: "Musik",
+                         1445: "Theater, Tanz",
+                         1443: "Literatur, Vorträge",
+                         13: "Kunst, Ausstellungen",
+                         10: "Architektur, Baukultur",
+                         450664: "Wirtschaft, Wissenschaft",
+                         7: "Messen, Kongresse",
+                         6: "Stadtleben",
+                         14: "Sport"}
+    
+    NEBENANDE = ["Kennenlernen & Stammtische",
+                 "Bildung & Erfahrung",
+                 "Kunst, Kultur & Musik",
+                 "Märkte & Flohmärkte",
+                 "Familien & Kinder",
+                 "Essen & Trinken",
+                 "Feste & Feiern",
+                 "Lokales Engagement",
+                 "Gestalten & Heimwerken",
+                 "Gesundheit & Wellness",
+                 "Sport & Bewegung",
+                 "Umwelt & Nachhaltigkeit",
+                 "Teilen, Tauschen, Reparieren",
+                 "Viertel verschönern",
+                 "Ausflüge",
+                 "Sonstiges"]
                                                     
 def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
     """Rounds time to nearest half hour

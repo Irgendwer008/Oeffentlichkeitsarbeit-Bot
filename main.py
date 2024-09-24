@@ -8,7 +8,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 
 from credentials import _Logindaten
-from helper import Veranstaltungsdetails, round_nearest_30min
+from helper import Veranstaltungsdetails, Kategorien, round_nearest_30min, YES
 
 import KalenderKarlsruhe
 import Nebenande
@@ -31,9 +31,9 @@ if __name__ == "__main__":
             name = input("\n# Wie lautet der Titel der Veranstaltung?: ")
         
         # Unterüberschrift
-        unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.VERANSTALTUNG_UNTERÜBERSCHRIFT + "'): ")
+        unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): ")
         if unterüberschrift == "":
-            unterüberschrift = Veranstaltungsdetails.VERANSTALTUNG_UNTERÜBERSCHRIFT
+            unterüberschrift = Veranstaltungsdetails.UNTERÜBERSCHRIFT
         
         # Beschreibung
         beschreibung = ""
@@ -88,24 +88,41 @@ if __name__ == "__main__":
         while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
             filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
             
+        # Kategorien
+        default_categories = ""
+        while True:
+            default_categories = input("Sollen die Standartkategorien ("
+                "Kalenderkarlsruhe: \"" + Kategorien.KALENDERKARLSRUHE[Veranstaltungsdetails.KATEGORIE_KALENDERKARLSRUHE] + "\" und "
+                "Nebenan.de: \"" + Kategorien.NEBENANDE[Veranstaltungsdetails.KATEGORIE_NEBENANDE] + "\") beibehalten werden? [Y/n]")
+            if default_categories in YES:
+                break
+            else:
+                # Kalender Karlsruhe
+                
+                category_kalenderkarlsruhe = input("")
+                
+        
+        
+            
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wird nicht veröffentlicht.\n")
         exit()
     
     # Done
-    details = Veranstaltungsdetails(VERANSTALTUNG_NAME = name, 
-                                    VERANSTALTUNG_UNTERÜBERSCHRIFT = unterüberschrift,
-                                    VERANSTALTUNG_BESCHREIBUNG = beschreibung,
-                                    VERANSTALTUNG_BEGINN = veranstaltungsbeginn,
-                                    VERANSTALTUNG_ENDE = veranstaltungsende,
-                                    VERANSTALTUNG_BILD_DATEIPFAD = abspath(filepath))
-    
-    print(details.VERANSTALTUNG_UNTERÜBERSCHRIFT)
+    details = Veranstaltungsdetails(NAME = name, 
+                                    UNTERÜBERSCHRIFT = unterüberschrift,
+                                    BESCHREIBUNG = beschreibung,
+                                    BEGINN = veranstaltungsbeginn,
+                                    ENDE = veranstaltungsende,
+                                    BILD_DATEIPFAD = abspath(filepath))
     
     exit()
     
     #TODO: check for valid values: locale (datepicker nebenan.de)
     #TODO: Make Nebenan.de category functional
+    #TODO: Allow choosing of which platforms to publish to
+    #TODO: Check if events where published correctly (prob takes much time :,) )
+    #TODO: Make all the input question their own functions
             
     options = Options()
     #options.add_argument("--headless")

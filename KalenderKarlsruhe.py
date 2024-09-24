@@ -39,30 +39,30 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     # Filling out form
 
     ## Bereich
-    Select(driver.find_element(By.ID, "reformField1")).select_by_value(details.VERANSTALTUNG_BEREICH)
+    Select(driver.find_element(By.ID, "reformField1")).select_by_value(str(details.KATEGORIE_KALENDERKARLSRUHE))
 
     ## Name der Veranstaltung
-    driver.find_element(By.ID, "reformField2").send_keys(details.VERANSTALTUNG_NAME)
+    driver.find_element(By.ID, "reformField2").send_keys(details.NAME)
 
     ## Unterüberschrift der Veranstaltung
-    driver.find_element(By.ID, "reformField3").send_keys(details.VERANSTALTUNG_UNTERÜBERSCHRIFT)
+    driver.find_element(By.ID, "reformField3").send_keys(details.UNTERÜBERSCHRIFT)
 
-    if (details.VERANSTALTUNG_BESCHREIBUNG != ""):
+    if (details.BESCHREIBUNG != ""):
         ## Beschreibung der Veranstaltung
-        driver.find_element(By.ID, "reformField4").send_keys(details.VERANSTALTUNG_BESCHREIBUNG)
+        driver.find_element(By.ID, "reformField4").send_keys(details.BESCHREIBUNG)
 
     ## Beginn der Veranstaltung: Datum
-    driver.find_element(By.ID, "reformField5-dt").send_keys(details.VERANSTALTUNG_BEGINN.strftime("%Y-%m-%d"))
+    driver.find_element(By.ID, "reformField5-dt").send_keys(details.BEGINN.strftime("%Y-%m-%d"))
 
     ## Beginn der Veranstaltung: Uhrzeit
-    driver.find_element(By.ID, "reformField5-tm").send_keys(details.VERANSTALTUNG_BEGINN.strftime("%H:%M"))
+    driver.find_element(By.ID, "reformField5-tm").send_keys(details.BEGINN.strftime("%H:%M"))
 
-    if (details.VERANSTALTUNG_ENDE is not None):
+    if (details.ENDE is not None):
         ## Ende der Veranstaltung: Datum
-        driver.find_element(By.ID, "reformField6-dt").send_keys(details.VERANSTALTUNG_ENDE.strftime("%Y-%m-%d"))
+        driver.find_element(By.ID, "reformField6-dt").send_keys(details.ENDE.strftime("%Y-%m-%d"))
 
         ## Ende der Veranstaltung: Uhrzeit
-        driver.find_element(By.ID, "reformField6-tm").send_keys(details.VERANSTALTUNG_ENDE.strftime("%H:%M"))
+        driver.find_element(By.ID, "reformField6-tm").send_keys(details.ENDE.strftime("%H:%M"))
 
     ## Veranstalungsort
     driver.find_element(By.ID, "reformField8_chosen").find_element(By.CLASS_NAME, "chosen-single").click()
@@ -73,10 +73,10 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     driver.find_element(By.ID, "reformField9_chosen").find_element(By.TAG_NAME, "input").send_keys("Studentenzentrum Z10 e.V." + Keys.TAB)
 
     ## Webadresse
-    driver.find_element(By.ID, "reformField10").send_keys(details.VERANSTALTUNG_LINK)
+    driver.find_element(By.ID, "reformField10").send_keys(details.LINK)
 
     ## Bild
-    driver.find_element(By.ID, "reformField12").send_keys(details.VERANSTALTUNG_BILD_DATEIPFAD)
+    driver.find_element(By.ID, "reformField12").send_keys(details.BILD_DATEIPFAD)
 
 
     # Send form

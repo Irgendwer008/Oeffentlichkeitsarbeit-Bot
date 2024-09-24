@@ -55,59 +55,59 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefo
     
     ## Titel und Veranstaltungsort
     elements = driver.find_elements(By.TAG_NAME, "input")
-    elements[0].send_keys(details.VERANSTALTUNG_NAME)
-    elements[1].send_keys(details.VERANSTALTUNG_ORT)
+    elements[0].send_keys(details.NAME)
+    elements[1].send_keys(details.ORT)
     
     ## Beginn: Tag
     elements[2].click()
         
     locale.setlocale(locale.LC_TIME, "de_DE.UTF8")    
     
-    while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.VERANSTALTUNG_BEGINN.strftime("%B %Y")):
+    while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.BEGINN.strftime("%B %Y")):
         driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
         
     for datebutton in driver.find_elements(By.TAG_NAME, "td"):
         try:
-            datebutton.find_element(By.XPATH, "//span[text()='" + str(details.VERANSTALTUNG_BEGINN.day) + "']").click()
+            datebutton.find_element(By.XPATH, "//span[text()='" + str(details.BEGINN.day) + "']").click()
             break
         except NoSuchElementException:
             pass
     
     ## Beginn: Uhrzeit
-    Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text(round_nearest_30min(details.VERANSTALTUNG_BEGINN).strftime("%H:%M"))
+    Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text(round_nearest_30min(details.BEGINN).strftime("%H:%M"))
     
     ## Ende
-    if (details.VERANSTALTUNG_ENDE is not None):
+    if (details.ENDE is not None):
         
         driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/article[2]/ul/li/span").click()
         driver.find_elements(By.TAG_NAME, "input")[3].click()
         
         ## Ende: Tag 
         
-        while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.VERANSTALTUNG_BEGINN.strftime("%B %Y")):
+        while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.BEGINN.strftime("%B %Y")):
             driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
             
         for datebutton in driver.find_elements(By.TAG_NAME, "td"):
             try:
-                datebutton.find_element(By.XPATH, "//span[text()='" + str(details.VERANSTALTUNG_BEGINN.day) + "']").click()
+                datebutton.find_element(By.XPATH, "//span[text()='" + str(details.BEGINN.day) + "']").click()
                 break
             except NoSuchElementException:
                 pass
         
         ## Ende: Uhrzeit
-        Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.VERANSTALTUNG_ENDE, True).strftime("%H:%M"))    
+        Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.ENDE, True).strftime("%H:%M"))    
     
     ## Beschreibung
-    driver.find_element(By.TAG_NAME, "textarea").send_keys(details.VERANSTALTUNG_BESCHREIBUNG)
+    driver.find_element(By.TAG_NAME, "textarea").send_keys(details.BESCHREIBUNG)
     
     ## Bild
-    driver.find_element(By.CLASS_NAME, "c-file_picker-input").send_keys(details.VERANSTALTUNG_BILD_DATEIPFAD)
+    driver.find_element(By.CLASS_NAME, "c-file_picker-input").send_keys(details.BILD_DATEIPFAD)
     time.sleep(1)
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/footer/span[1]"))).click()
         
     ## Kategorie
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[3]"))).click()
+    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(details.KATEGORIE_NEBENANDE + 1) + "]"))).click()
         
     ## Submit
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
