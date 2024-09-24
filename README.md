@@ -29,6 +29,7 @@ example with "Name" as plugin name:
 - create a Name.py file that contains an object "plugininfo" of type "PluginInfo" (see helper.py) and a "run" funtion
 - Set a friendly name (i.e. "my Plugin") and an dict[str: str] of category indices and names (if applicable, else leave empty)
 - populate the run-function with code that logs into your platform and publishes the Event
+- add the plugin to the "plugins" array in main ((currently) at line 114)
 
 ### Helpful links for further development
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
