@@ -7,8 +7,6 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 
 - **Selenium** is needed as it does all the web automation: `pip3 install selenium`
 
-- **Tkinter** is needed for file open dialog (should come preinstalled, if not, look [here](https://stackoverflow.com/questions/69603788/how-to-pip-install-tkinter))
-
 - **Firefox** is used as browser and therefor also necessary and has to be installed.
 
 - locale **"de_DE"** is [installed](https://ubuntuforums.org/showthread.php?t=196414)
