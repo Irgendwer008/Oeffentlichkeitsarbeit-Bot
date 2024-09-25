@@ -23,15 +23,17 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 - Nebenan.de
 - StuWe
 - Z10 Website + Wiki
+- Venyoo
 
 ### Currently mostly working plugins:
+None
 
 ### How to add new Plugins:
 example with "Name" as plugin name:
-- create a Name.py file that contains an object "plugininfo" of type "PluginInfo" (see helper.py) and a "run" funtion
-- Set a friendly name (i.e. "my Plugin") and an dict[str: str] of category indices and names (if applicable, else leave empty)
-- populate the run-function with code that logs into your platform and publishes the Event
-- add the plugin to the "plugins" array in main ((currently) at line 114)
+- create a Name.py file that contains an object `plugininfo` of type `PluginInfo` (see helper.py) and a `run` funtion
+- Set a `str` with a friendly name (i.e. "my Plugin"), a `str` of your default kategory key (if applicable, else `None`) and a `dict[str: str]` of category indices and names (if applicable, else a empty `dict`)
+- populate the `run`-function with code that logs into your platform and publishes the Event
+- import `Name` and add `Name` to the `plugins` array in main.py ((currently) at line 18)
 
 ### Helpful links for further development
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
