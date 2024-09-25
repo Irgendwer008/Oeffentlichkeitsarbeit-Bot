@@ -17,3 +17,6 @@ class _Logindaten:
     # Z10
     Z10_USERNAME = ""
     Z10_PASSWORD = ""
+    # Venyoo
+    VENYOO_USERNAME = ""
+    VENYOO_PASSWORD = ""

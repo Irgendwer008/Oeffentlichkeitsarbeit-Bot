@@ -19,8 +19,10 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 - *.gif
 
 ### Currently fully working plugins:
-- KalenderKarlsruhe
+- Kalender Karlsruhe
 - Nebenan.de
+- StuWe
+- Z10 Website + Wiki
 
 ### Currently mostly working plugins:
 

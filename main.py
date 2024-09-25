@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from datetime import datetime
 from os.path import exists
 from os.path import abspath
@@ -12,7 +14,8 @@ import Nebenande
 import Meta
 import StuWe
 import Z10Website
-plugins = [Z10Website]
+import Venyoo
+plugins = [Venyoo]
 
 from os.path import abspath
     
@@ -205,9 +208,13 @@ if __name__ == "__main__":
             plugin.run(details, credentials, plugins, driver)
             print("Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht.")
             lastsuccesful += 1
-        #driver.quit()
+        driver.quit()
     except KeyboardInterrupt:
         print("\n\n!!Achtung!! Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+        driver.quit()
     except Exception as e:
         print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n")
+        driver.quit()
         raise e
+    
+    driver.quit()

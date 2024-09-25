@@ -54,5 +54,5 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     textarea.click()
     textarea.send_keys(details.BESCHREIBUNG + Keys.TAB)
     
-    step("Terin erstellen")
+    step("Termin erstellen")
     driver.find_element(By.ID, "submitButton").click()

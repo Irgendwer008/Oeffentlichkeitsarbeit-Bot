@@ -130,5 +130,3 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
             
     ## Submit
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
-    
-    return
