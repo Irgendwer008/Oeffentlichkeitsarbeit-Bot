@@ -14,3 +14,6 @@ class _Logindaten:
     # StuWe
     STUWE_USERNAME = ""
     STUWE_PASSWORD = ""
+    # Z10
+    Z10_USERNAME = ""
+    Z10_PASSWORD = ""
