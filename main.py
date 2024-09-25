@@ -2,9 +2,7 @@ from datetime import datetime
 from os.path import exists
 from os.path import abspath
 from selenium import webdriver
-from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from credentials import _Logindaten
 from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO

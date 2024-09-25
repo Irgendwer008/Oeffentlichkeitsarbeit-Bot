@@ -1,13 +1,8 @@
 from datetime import datetime
-import sys
-import time
-import locale
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
 
 from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
 from credentials import _Logindaten

@@ -4,15 +4,11 @@
 # Facebook:
 # "https://www.youtube.com/watch?v=nPOgLZuuURs
 
-import sys
 import time
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 
 from helper import Veranstaltungsdetails, PluginInfo, step
 from credentials import _Logindaten
