@@ -12,8 +12,9 @@ from selenium.common.exceptions import NoSuchElementException
 from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min
 from credentials import _Logindaten
 
-plugininfo = PluginInfo("Nebenan.de",
-                        {"0": "Kennenlernen & Stammtische",
+plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
+                        DEFAULTCATEGORY_KEY="2",
+                        KATEGORIEN={"0": "Kennenlernen & Stammtische",
                          "1": "Bildung & Erfahrung",
                          "2": "Kunst, Kultur & Musik",
                          "3": "Märkte & Flohmärkte",

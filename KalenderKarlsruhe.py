@@ -11,8 +11,9 @@ from selenium.common.exceptions import NoSuchElementException
 from helper import Veranstaltungsdetails, PluginInfo
 from credentials import _Logindaten
 
-plugininfo = PluginInfo("Kalender Karlsruhe",
-                        {"1444": "Musik",
+plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
+                        DEFAULTCATEGORY_KEY="1444",
+                        KATEGORIEN={"1444": "Musik",
                          "1445": "Theater, Tanz",
                          "1443": "Literatur, Vorträge",
                          "13": "Kunst, Ausstellungen",
@@ -49,7 +50,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
 
     # Filling out form
 
-    ## Bereich
+    ## Kategorie
     Select(driver.find_element(By.ID, "reformField1")).select_by_value(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])])
 
     ## Name der Veranstaltung

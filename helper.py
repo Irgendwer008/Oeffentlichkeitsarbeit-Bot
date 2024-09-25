@@ -10,15 +10,16 @@ class Veranstaltungsdetails:
     BESCHREIBUNG: str
     BEGINN: datetime
     BILD_DATEIPFAD: str
+    AUSGEWÄHLTE_KATEGORIE: list[str | None] # Number or None, if no category needed existant
     ENDE: datetime = None # Optional
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
     ORT: str = "Zähringerstraße 10"
     LINK: str = "https://z10.info"
-    AUSGEWÄHLTE_KATEGORIE: list[str] = "1444", "2" # Optional. For other Categories see the plugin's "pluginingo".
 
 @dataclass
 class PluginInfo:
     FRIENDLYNAME: str
+    DEFAULTCATEGORY_KEY: str
     KATEGORIEN: dict[str: str]
                                                     
 def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:

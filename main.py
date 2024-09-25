@@ -18,29 +18,30 @@ from os.path import abspath
 #TODO: Allow choosing of which plugins to use
 #TODO: Check if events where published correctly (prob takes much time :,) )
 #TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
+#TODO: add adding of default category to helper.Veranstaltungsdetails.AUSGEWÄHLTE_KATEGORIE
 
 def get_name() -> str:
-    name = "Test"
+    name = ""
     while name == "":
-        name = input("\n# Wie lautet der Titel der Veranstaltung?: ")
+        name = input("\n# Wie lautet der Titel der Veranstaltung?: \n> ")
     return name
         
 def get_unterüberschrift() -> str:
-    unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): ")
+    unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): \n> ")
     if unterüberschrift == "":
         unterüberschrift = Veranstaltungsdetails.UNTERÜBERSCHRIFT
     return unterüberschrift
         
 def get_beschreibung() -> str:
-    beschreibung = "Dies ist eine Testbeschreibung"
+    beschreibung = ""
     while beschreibung == "":
-        beschreibung = input("\n# Wie lautet die Beschreibung der Veranstaltung?: ")
+        beschreibung = input("\n# Wie lautet die Beschreibung der Veranstaltung?: \n> ")
     return beschreibung
 
 def get_beginn() -> datetime:
     while (True):
         try:
-            veranstaltungsbeginn = datetime.strptime(input("\n# Wann beginnt die Veranstaltung? (Format: 01.02.2024 17:42): "), "%d.%m.%Y %H:%M")
+            veranstaltungsbeginn = datetime.strptime(input("\n# Wann beginnt die Veranstaltung? (Format: 01.02.2024 17:42): \n> "), "%d.%m.%Y %H:%M")
             if veranstaltungsbeginn < datetime.now():
                 raise Exception
             break
@@ -54,7 +55,7 @@ def get_ende(veranstaltungsbeginn) -> datetime:
     veranstaltungsende = None
     while (True):
         
-        string = input("\n# Wann endet die Veranstaltung? Lasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat. (Format: 01.02.2024 17:42): ")
+        string = input("\n# Wann endet die Veranstaltung? Lasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat. (Format: 01.02.2024 17:42): \n> ")
                     
         if string == "":
             break
@@ -81,30 +82,64 @@ def notify_of_rounded_times(beginn: datetime, ende: datetime):
     return
 
 def get_bild() -> str:
-    filepath = "image.jpg" # input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: ")
+    filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
         
     while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
         filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
     return abspath(filepath)
-
-"""
-def get_single_category(index: int) -> str:
-    categories = plugins[index].plugininfo
+    
 def get_kategorien() -> list[str]:
-        default_categories = ""
-        while True:
-            default_categories = input("Sollen die Standartkategorien ("
-                "Kalenderkarlsruhe: \"" + Kategorien.KALENDERKARLSRUHE[Veranstaltungsdetails.KATEGORIE_KALENDERKARLSRUHE] + "\" und "
-                "Nebenan.de: \"" + Kategorien.NEBENANDE[Veranstaltungsdetails.KATEGORIE_NEBENANDE] + "\") beibehalten werden? [Y/n]")
-            if default_categories in YES:
-                break
-            elif default_categories in NO:
-                # Kalender Karlsruhe
-                
-                # Nebenande
-                
-                category_kalenderkarlsruhe = input("")
-"""
+    default_categories = ""
+    while True:
+        # dynamically generate question
+        askstring = "\nSollen die Standartkategorien\n\n"            
+        for plugin in plugins:
+            # add line, if this plugin uses categories
+            if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
+                askstring += "  " + plugin.plugininfo.FRIENDLYNAME + ": \"" + plugin.plugininfo.KATEGORIEN[plugin.plugininfo.DEFAULTCATEGORY_KEY] + "\",\n"
+        askstring += "\nbeibehalten werden? [Y/n]\n> "
+        
+        # ask if default categories should be kept
+        default_categories = input(askstring)
+        
+        # if so, break
+        if default_categories in YES:
+            break
+        
+        # if not, ask for new categories
+        elif default_categories in NO:
+            ausgewählte_kategorien = []
+            
+            for plugin in plugins:
+                # if this plugin doesnt use categories, set this list entry to None
+                if plugin.plugininfo.DEFAULTCATEGORY_KEY is None:
+                    ausgewählte_kategorien.append(None)
+                # if it does use categories, ask which one should be used and assign it's key to the list
+                else:
+                    while True:
+                        print("\nWelche Kategorie soll für \"" + plugin.plugininfo.FRIENDLYNAME + "\" verwendet werden? Bitte gib die entsprechende Zahl (1-" + str(len(plugin.plugininfo.KATEGORIEN)) + ") an: ")
+                        for i in range(1, len(plugin.plugininfo.KATEGORIEN) + 1):
+                            print(" [" + str(i) + "] " + plugin.plugininfo.KATEGORIEN[list(plugin.plugininfo.KATEGORIEN)[i-1]])
+                        try:
+                            # try assigning this key to the list
+                            ausgewählte_kategorien.append(list(plugin.plugininfo.KATEGORIEN)[int(input("> "))-1])
+                            print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[list(plugin.plugininfo.KATEGORIEN)[i-1]] + "\" verwenden.")
+                            break
+                        except KeyboardInterrupt as e:
+                            raise e
+                        except Exception as e:
+                            print("\nThat is not a valid option!\n")
+            break
+        
+    # little easter egg, if you will
+    those_are_the_default_values_tho = True
+    for i in range(0, len(plugins)):
+        if plugins[i].plugininfo.DEFAULTCATEGORY_KEY != ausgewählte_kategorien[i]:
+            those_are_the_default_values_tho = False
+    if those_are_the_default_values_tho:
+        print("\nAber... das... das sind doch schon die Standardwerte? Wie auch immer, weiter gehts:\n")
+    
+    return ausgewählte_kategorien
 
 if __name__ == "__main__":
     
@@ -116,16 +151,21 @@ if __name__ == "__main__":
     
     # Get event details
     try:
-        details = Veranstaltungsdetails(NAME = get_name(), 
-                                        UNTERÜBERSCHRIFT = get_unterüberschrift(),
-                                        BESCHREIBUNG = get_beschreibung(),
-                                        BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"), # get_beginn(),
-                                        ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"), # get_ende(veranstaltungsbeginn),
-                                        BILD_DATEIPFAD = get_bild())  
+        # Values may be hardcorded here for faster Testing of plugins so that one doesn't have to type every detail every time
+        details = Veranstaltungsdetails(NAME = "Test", #get_name(), 
+                                        UNTERÜBERSCHRIFT = "Dies ist eine Testbeschreibung", #get_unterüberschrift(),
+                                        BESCHREIBUNG = "Dies ist eine Beispielbeschreibung", #get_beschreibung(),
+                                        BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"), #get_beginn(),
+                                        ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"), #get_ende(veranstaltungsbeginn),
+                                        BILD_DATEIPFAD = "image.jpg", # get_bild())  
+                                        AUSGEWÄHLTE_KATEGORIE = get_kategorien())
         notify_of_rounded_times(details.BEGINN, details.ENDE)   
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
+    
+    print(details)
+    exit()
     
     # Get login credentials
     credentials = _Logindaten
