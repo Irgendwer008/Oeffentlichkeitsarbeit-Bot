@@ -11,3 +11,6 @@ class _Logindaten:
     # Instagram (für Meta Business Suite)
     INSTAGRAM_USERNAME = ""
     INSTAGRAM_PASSWORD = ""
+    # StuWe
+    STUWE_USERNAME = ""
+    STUWE_PASSWORD = ""

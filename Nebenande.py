@@ -13,7 +13,7 @@ from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min
 from credentials import _Logindaten
 
 plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
-                        DEFAULTCATEGORY_KEY="2",
+                        DEFAULTCATEGORY_KEY="2", # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={"0": "Kennenlernen & Stammtische",
                          "1": "Bildung & Erfahrung",
                          "2": "Kunst, Kultur & Musik",
@@ -76,7 +76,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     ## Titel und Veranstaltungsort
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
         driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Name der Veranstaltung"]'))).send_keys(details.NAME)
-    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Ort der Veranstaltung"]').send_keys(details.ORT)
+    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Ort der Veranstaltung"]').send_keys(details.STRASSE)
     
     ## Beginn: Tag
     driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Tag"]').click()

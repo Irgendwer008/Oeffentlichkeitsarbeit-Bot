@@ -18,7 +18,7 @@ from helper import Veranstaltungsdetails, PluginInfo, step
 from credentials import _Logindaten
 
 plugininfo = PluginInfo(FRIENDLYNAME="Meta Business Suite",
-                        DEFAULTCATEGORY_KEY=None,
+                        DEFAULTCATEGORY_KEY=None, # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={})
 
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):

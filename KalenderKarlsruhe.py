@@ -12,7 +12,7 @@ from helper import Veranstaltungsdetails, PluginInfo
 from credentials import _Logindaten
 
 plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
-                        DEFAULTCATEGORY_KEY="1444",
+                        DEFAULTCATEGORY_KEY="1444", # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={"1444": "Musik",
                          "1445": "Theater, Tanz",
                          "1443": "Literatur, Vorträge",

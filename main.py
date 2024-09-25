@@ -1,8 +1,10 @@
 from datetime import datetime
 from os.path import exists
 from os.path import abspath
+from selenium import webdriver
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from credentials import _Logindaten
 from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO
@@ -10,7 +12,8 @@ from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO
 import KalenderKarlsruhe
 import Nebenande
 import Meta
-plugins = [Meta]
+import StuWe
+plugins = [StuWe]
 
 from os.path import abspath
     
@@ -20,6 +23,8 @@ from os.path import abspath
 #TODO: Check if events where published correctly (prob takes much time :,) )
 #TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
 #TODO: add adding of default category to helper.Veranstaltungsdetails.AUSGEWÄHLTE_KATEGORIE
+#TODO: try facebok-sdk (see link at top of Meta.py)
+#TODO: implement user input for all details (see class Veranstaltungsdetails)
 
 def get_name() -> str:
     name = ""
@@ -181,13 +186,14 @@ if __name__ == "__main__":
     # Get login credentials
     credentials = _Logindaten
     
-    # init driver
+    # init driver    
     options = Options()
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-extensions")
     options.set_preference("permissions.default.desktop-notification", 2)
     #options.add_argument("--headless")
-    driver = Firefox(options=options)
+
+    driver = webdriver.Firefox(options=options)
     
     # Newline
     print("")

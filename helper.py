@@ -14,7 +14,10 @@ class Veranstaltungsdetails:
     AUSGEWÄHLTE_KATEGORIE: list[str | None] # Number or None, if no category needed existant
     ENDE: datetime = None # Optional
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
-    ORT: str = "Zähringerstraße 10"
+    LOCATION: str = "Z10 e.V."
+    STRASSE: str = "Zähringerstraße 10"
+    PLZ: str = "76131"
+    STADT: str = "Karlsruhe"
     LINK: str = "https://z10.info"
 
 @dataclass
