@@ -9,7 +9,8 @@ from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO
     
 import KalenderKarlsruhe
 import Nebenande
-plugins = [KalenderKarlsruhe, Nebenande]
+import Meta
+plugins = [Meta]
 
 from os.path import abspath
     
@@ -91,6 +92,16 @@ def get_bild() -> str:
 def get_kategorien() -> list[str]:
     default_categories = ""
     ausgewählte_kategorien = []
+    
+    # Check if there are any plugins that use categories
+    any_categories_needed = False
+    for plugin in plugins:
+        if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
+            any_categories_needed = True
+            break
+    if not any_categories_needed:
+        return []
+    
     while True:
         # dynamically generate question
         askstring = "\nSollen die Standartkategorien\n\n"            
@@ -172,6 +183,9 @@ if __name__ == "__main__":
     
     # init driver
     options = Options()
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-extensions")
+    options.set_preference("permissions.default.desktop-notification", 2)
     #options.add_argument("--headless")
     driver = Firefox(options=options)
     
@@ -185,9 +199,9 @@ if __name__ == "__main__":
             plugin.run(details, credentials, plugins, driver)
             print("Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht.")
             lastsuccesful += 1
-        driver.quit()
+        #driver.quit()
     except KeyboardInterrupt:
         print("\n\n!!Achtung!! Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
     except Exception as e:
-        print(e)
-        print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+        print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n")
+        raise e

@@ -41,13 +41,13 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     
     # Decline cookies
     
-    WebDriverWait(driver, 3).until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, '[title="SP Consent message"]')))
+    WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, '[title="SP Consent message"]')))
     
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".message-component.message-button.no-children.focusable.sp_choice_type_13"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".message-component.message-button.no-children.focusable.sp_choice_type_13"))).click()
     
     driver.switch_to.default_content()
     
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.NAME, "email")))
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, "email")))
 
 
     # Login
@@ -61,20 +61,20 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     driver.find_element(By.CLASS_NAME, "ui-button-primary").click()   
     
      
-    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.TAG_NAME, "article")))
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "article")))
     
     time.sleep(2)
 
 
     # Open dialogue
     
-    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
     
     
     # Filling out Form
     
     ## Titel und Veranstaltungsort
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
         driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Name der Veranstaltung"]'))).send_keys(details.NAME)
     driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Ort der Veranstaltung"]').send_keys(details.ORT)
     
@@ -123,11 +123,11 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     ## Bild
     driver.find_element(By.CLASS_NAME, "c-file_picker-input").send_keys(details.BILD_DATEIPFAD)
     time.sleep(1)
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/footer/span[1]"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/footer/span[1]"))).click()
         
     ## Kategorie
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
             
     ## Submit
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()

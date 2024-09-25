@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from inspect import stack, getmodule
 
 YES = ["Y", "y", "Yes", "yes", "Ja", "ja"]
 NO = ["N", "n", "No", "no", "Nein", "nein"]
@@ -36,3 +37,6 @@ def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
     result = dtobj.replace(minute=30 - 30 * earlier)
     result += timedelta(minutes=dtobj.minute - dtobj.minute % 30)
     return result
+
+def step(text: str):
+    print(getmodule(stack()[1][0]).plugininfo.FRIENDLYNAME + ": " + text + "                                                             ", end="\r")

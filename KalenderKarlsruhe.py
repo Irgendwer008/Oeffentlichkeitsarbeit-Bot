@@ -27,10 +27,8 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 
-
-    # Decline Cookies
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CLASS_NAME, "cn-decline"))).click()
-    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.NAME, "email")))
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "cn-decline"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, "email")))
     time.sleep(1)
 
 
@@ -45,7 +43,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     driver.find_element(By.ID, "reformloginmail$").click()
 
     # Waiting for page loading
-    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, "reform")))
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "reform")))
     
 
     # Filling out form
@@ -93,9 +91,3 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
 
     # Send form
     driver.find_element(By.ID, "reformcreate$").click()
-
-    # check for error messages
-    try:
-        return driver.find_element(By.CLASS_NAME, "alert").get_attribute("innerHTML")
-    except NoSuchElementException:
-        return "Modul: KalenderKarlsruhe: Fehler!\n"
