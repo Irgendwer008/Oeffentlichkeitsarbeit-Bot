@@ -130,8 +130,6 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     WebDriverWait(driver, 3).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
             
     ## Submit
-    #driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
-    
-    time.sleep(10)
+    driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
     
     return

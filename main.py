@@ -90,6 +90,7 @@ def get_bild() -> str:
     
 def get_kategorien() -> list[str]:
     default_categories = ""
+    ausgewählte_kategorien = []
     while True:
         # dynamically generate question
         askstring = "\nSollen die Standartkategorien\n\n"            
@@ -103,13 +104,13 @@ def get_kategorien() -> list[str]:
         default_categories = input(askstring)
         
         # if so, break
-        if default_categories in YES:
+        if default_categories in [YES, ""]:
+            for plugin in plugins:
+                ausgewählte_kategorien.append(plugin.plugininfo.DEFAULTCATEGORY_KEY)
             break
         
         # if not, ask for new categories
-        elif default_categories in NO:
-            ausgewählte_kategorien = []
-            
+        elif default_categories in NO:            
             for plugin in plugins:
                 # if this plugin doesnt use categories, set this list entry to None
                 if plugin.plugininfo.DEFAULTCATEGORY_KEY is None:
@@ -129,15 +130,17 @@ def get_kategorien() -> list[str]:
                             raise e
                         except Exception as e:
                             print("\nThat is not a valid option!\n")
+                            
+            # little easter egg, if you will
+            those_are_the_default_values_tho = True
+            for i in range(0, len(plugins)):
+                if plugins[i].plugininfo.DEFAULTCATEGORY_KEY != ausgewählte_kategorien[i]:
+                    those_are_the_default_values_tho = False
+            if those_are_the_default_values_tho:
+                print("\nAber... das... das sind doch schon die Standardwerte? Wie auch immer, weiter gehts:\n")
+                
             break
         
-    # little easter egg, if you will
-    those_are_the_default_values_tho = True
-    for i in range(0, len(plugins)):
-        if plugins[i].plugininfo.DEFAULTCATEGORY_KEY != ausgewählte_kategorien[i]:
-            those_are_the_default_values_tho = False
-    if those_are_the_default_values_tho:
-        print("\nAber... das... das sind doch schon die Standardwerte? Wie auch immer, weiter gehts:\n")
     
     return ausgewählte_kategorien
 
@@ -157,15 +160,12 @@ if __name__ == "__main__":
                                         BESCHREIBUNG = "Dies ist eine Beispielbeschreibung", #get_beschreibung(),
                                         BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"), #get_beginn(),
                                         ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"), #get_ende(veranstaltungsbeginn),
-                                        BILD_DATEIPFAD = "image.jpg", # get_bild())  
+                                        BILD_DATEIPFAD = abspath("image.jpg"), # get_bild())  
                                         AUSGEWÄHLTE_KATEGORIE = get_kategorien())
         notify_of_rounded_times(details.BEGINN, details.ENDE)   
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
-    
-    print(details)
-    exit()
     
     # Get login credentials
     credentials = _Logindaten

@@ -92,10 +92,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
 
 
     # Send form
-    #driver.find_element(By.ID, "reformcreate$").click()
-
-    time.sleep(10)
-
+    driver.find_element(By.ID, "reformcreate$").click()
 
     # check for error messages
     try:
