@@ -21,7 +21,7 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 # Folgendes ist noch in der Entwicklung und funktioniert wahrscheinlich nicht, solange dieser Text noch hier steht :D
 
-### Requirements for running Oeffentlichkeitsarbeit-Bot
+### Requirements for running Oeffentlichkeitsarbeit-Bot.bin
 
 - **Firefox** is used as browser and therefor also necessary and has to be installed.
 
@@ -31,7 +31,7 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
 
-### Requirements for binary conversion from main.py to Oeffentlichkeitsarbeit-Bot
+### Requirements for binary conversion from main.py to Oeffentlichkeitsarbeit-Bot.bin
 
 all pip-requirements are listed in requirements_for_binary_conversion.txt. To install all at once execute `pip3 install -r requirements.txt`
 
