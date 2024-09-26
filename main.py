@@ -27,6 +27,7 @@ from os.path import abspath
 #TODO: Add docstrings for better readability :D
 #TODO: Venyoo working custom category
 #TODO: Way to go back one step and change previous input
+#TODO: Wrap Beschreibung in Overview
 
 def get_plugins() -> list:
     while True:
@@ -241,14 +242,15 @@ def get_kategorien(plugins: list) -> list[str]:
                     ausgewählte_kategorien.append(None)
                 # if it does use categories, ask which one should be used and assign it's key to the list
                 else:
+                    available_categories = plugin.plugininfo.KATEGORIEN.keys()
                     while True:
                         print("\nWelche Kategorie soll für \"" + plugin.plugininfo.FRIENDLYNAME + "\" verwendet werden? Bitte gib die entsprechende Zahl (1-" + str(len(plugin.plugininfo.KATEGORIEN)) + ") an: ")
-                        for i in range(1, len(plugin.plugininfo.KATEGORIEN) + 1):
-                            print(" [" + str(i) + "] " + plugin.plugininfo.KATEGORIEN[list(plugin.plugininfo.KATEGORIEN)[i-1]])
+                        for i in range(1, len(available_categories) + 1):
+                            print(" [" + str(i) + "] " + plugin.plugininfo.KATEGORIEN[available_categories[i-1]])
                         try:
                             # try assigning this key to the list
-                            ausgewählte_kategorien.append(list(plugin.plugininfo.KATEGORIEN)[int(input("> "))-1])
-                            print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[list(plugin.plugininfo.KATEGORIEN)[i-1]] + "\" verwenden.")
+                            ausgewählte_kategorien.append(plugin.plugininfo.KATEGORIEN[available_categories[int(input("> "))-1]])
+                            print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[available_categories[-1]] + "\" verwenden.")
                             break
                         except KeyboardInterrupt as e:
                             raise e
@@ -356,7 +358,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: _L
                     first = False
                 else:
                     format.overview_print("")
-                print(("{:<%i}" %(max_length + 5)).format(" " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[plugin.plugininfo.DEFAULTCATEGORY_KEY])
+                print(("{:<%i}" %(max_length + 5)).format(" " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]])
             
         format.overview_newline()
     
@@ -368,7 +370,12 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: _L
 
             
     ## Confirm all
-    input("\n Zum Bestätigen, drücke <Enter>.\n> ")
+    while True:
+        confirm = input("\n Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> ")
+        if confirm == "":
+            return
+        if confirm.lower() == "abbrechen":
+            exit()
 
 if __name__ == "__main__":
     

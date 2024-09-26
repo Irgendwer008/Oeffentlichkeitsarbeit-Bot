@@ -24,7 +24,6 @@ plugininfo = PluginInfo(FRIENDLYNAME="Z10 Homepage + Wiki",
                                     "13": "Theater"})
 
 
-
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get("https://admin.z10.info/termine/create")
