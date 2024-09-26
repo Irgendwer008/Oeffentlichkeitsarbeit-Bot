@@ -30,11 +30,11 @@ from sys import exit
 from credentials import _Logindaten
 from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
     
-import KalenderKarlsruhe
-import Nebenande
-import StuWe
-import Z10Website
-import Venyoo
+import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
+import Plugins.Nebenande as Nebenande
+import Plugins.StuWe as StuWe
+import Plugins.Z10Website as Z10Website
+import Plugins.Venyoo as Venyoo
 available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
 
 from os.path import abspath
