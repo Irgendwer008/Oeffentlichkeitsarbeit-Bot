@@ -16,7 +16,7 @@ import Nebenande
 import StuWe
 import Z10Website
 import Venyoo
-plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
+available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
 
 from os.path import abspath
     
@@ -32,21 +32,15 @@ def get_plugins() -> list:
     while True:
         # print all available plugins with number
         print("\n# Auf welchen Platformen soll die Veranstaltung veröffentlicht werden? Gib \"Alle\" wenn alle Plugins, oder die entsprechende(n) Zahl(en), mit Komma getrennt, an:\n")
-        for i in range(1, len(plugins) + 1):
-            print(" [" + str(i) + "] " + plugins[i-1].plugininfo.FRIENDLYNAME)
+        for i in range(1, len(available_plugins) + 1):
+            print(" [" + str(i) + "] " + available_plugins[i-1].plugininfo.FRIENDLYNAME)
             
         # recieve answer
         answer = input("\n> ")
         
-        print("\n'" + answer + "'\n")
-        
-        if answer == "^[[A":
-            print("Yay")
-        exit()
-        
         # check, if "Alle" was selected
         if answer.lower() in ["alle", "allen", "all"]:
-            return plugins
+            return available_plugins
         
         # if not, split the answer-string at every comma
         choices = answer.split(",")
@@ -62,9 +56,9 @@ def get_plugins() -> list:
             
             for choice in choices:          # Iterate over every given choice
                 number = int(choice) - 1    # Catch choice not a integer
-                if number not in range(0, len(plugins)):    # Catch number out of range
+                if number not in range(0, len(available_plugins)):    # Catch number out of range
                     raise Exception
-                new_plugins_list.append(plugins[number])
+                new_plugins_list.append(available_plugins[number])
             
             return new_plugins_list
                 
@@ -73,19 +67,13 @@ def get_plugins() -> list:
             pass
         print(format.error("Deine Eingabe war fehlerhaft. Bitte versuche es erneut."))
             
-def print_current_plugins():
+def print_current_plugins(plugins: list):
     print(format.info("Es werden folgende Plugins verwendet werden: \n"))
     for plugin in plugins:
         print(format.INFO + "  " + plugin.plugininfo.FRIENDLYNAME + format.CLEAR)
     input("\n Zum Vortsetzen, drücke eine beliebige Taste.\n> ")
     
-def get_Z10_credetials() -> tuple[str, str]:
-    try:
-        if Z10Website in plugins:
-            pass
-    except:
-            return ("", "")
-    
+def get_Z10_credetials(ls: list) -> tuple[str, str]:
     username = ""
     password = ""
     
@@ -209,7 +197,7 @@ def notify_of_rounded_times(beginn: datetime, ende: datetime):
     
     return
     
-def get_kategorien() -> list[str]:
+def get_kategorien(plugins: list) -> list[str]:
     default_categories = ""
     ausgewählte_kategorien = []
     
@@ -294,38 +282,47 @@ if __name__ == "__main__":
     
     # Get event details
     try:        
-    
+        # Plugins
         reset_screen(heading="Plugins")
         plugins = get_plugins()
-        print_current_plugins()
+        print_current_plugins(plugins)
+                
+        # Z10 user account
+        if Z10Website in plugins:
+            reset_screen(heading="Z10 Benutzerkonto")
+            username, password = get_Z10_credetials(plugins)
+        else:
+            username, password =  ("", "")
         
-        reset_screen(heading="Z10 Benutzerkonto")
-        username, password = get_Z10_credetials()
-        
+        # Title and description
         reset_screen(heading="Titel und Beschreibung")
         name = get_name()
         unterüberschrift = get_unterüberschrift()
         beschreibung=get_beschreibung()
         
+        # Dates and times
         reset_screen(heading="Zeiten")
         beginn = get_beginn()
         ende = get_ende(beginn)
         notify_of_rounded_times(beginn, ende)
         
+        # Localtion
         reset_screen(heading="Veranstaltungsort")
         location, strasse, plz, stadt = get_location()
         
+        # Categories
         reset_screen(heading="Kategorien")
-        kategorien = get_kategorien()
+        kategorien = get_kategorien(plugins)
         
+        # Image and link path / uri
         reset_screen(heading="Bild und Link")
-        bild = get_bild()
+        bild = abspath(get_bild())
         link = get_link()
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
         
-        
+    # Enter event details
     details = Veranstaltungsdetails(NAME = name, 
                                     UNTERÜBERSCHRIFT = unterüberschrift,
                                     BESCHREIBUNG = beschreibung,
@@ -335,22 +332,11 @@ if __name__ == "__main__":
                                     STRASSE = strasse,
                                     PLZ = plz,
                                     STADT = stadt,
-                                    BILD_DATEIPFAD = abspath(bild),
+                                    BILD_DATEIPFAD = bild,
                                     LINK = link,
                                     AUSGEWÄHLTE_KATEGORIE = kategorien)
     
-    # Values may be *temporarily* hardcorded here for faster Testing of plugins so that one doesn't have to type every detail every time. Comment for normal functionality
-    """
-    details = Veranstaltungsdetails(NAME = "Test",
-                                    UNTERÜBERSCHRIFT = "Dies ist eine Testbeschreibung",
-                                    BESCHREIBUNG = "Dies ist eine Beispielbeschreibung",
-                                    BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"),
-                                    ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"),
-                                    BILD_DATEIPFAD = abspath("image.jpg"),
-                                    AUSGEWÄHLTE_KATEGORIE = kategorien)
-    """
-    
-    # Get login credentials
+    # Enter necessary login credentials
     credentials = _Logindaten(Z10_USERNAME = username,
                               Z10_PASSWORD = password)
     
@@ -359,7 +345,7 @@ if __name__ == "__main__":
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-extensions")
     options.set_preference("permissions.default.desktop-notification", 2)
-    #options.add_argument("--headless")
+    options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     
     # Newline
