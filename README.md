@@ -42,7 +42,7 @@ example with "Name" as plugin name:
 - import `Name` and add `Name` to the `plugins` array in main.py ((currently) at line 18)
 
 ### Helpful links for further development
-This acts as a help for people new to this context, but also as a link-collection for future projects
+This acts as a help for people new to this context, but also as a link-collection for future projects for myself
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
 - [Nice overview over selenium and many of it's features](https://pythonexamples.org/python-selenium-introduction/)
 - [datetime format codes](https://www.geeksforgeeks.org/python-datetime-strptime-function/)
