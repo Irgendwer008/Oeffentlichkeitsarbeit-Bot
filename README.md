@@ -1,6 +1,17 @@
 # Oeffentlichkeitsarbeit-Bot
 Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. auf Platformen aller Art
 
+``` sh
+Benutzung: main.py [-h] [-w]
+
+Automatisiertes Veröffentlichen von Events auf einer Reihe von Platformen
+
+options:
+  -h, --help          Zeige diese Hilfe und beende das Programm
+  -w, --not-headless  Ist diese Flagge gesetzt öffnet sich Firefox als
+                      Fenster. Wenn nicht, läuft es nur im Hintergrund
+```
+
 ### Requirements for running main.py
 
 all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install -r requirements.txt`
