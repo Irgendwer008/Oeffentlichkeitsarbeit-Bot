@@ -1,8 +1,7 @@
+__pycache__/
+build/
 
 credentials.py
-
-__pycache__/
-
-build/
+image.jpg
 Oeffentlichkeitsarbeit-Bot.bin.spec
 Oeffentlichkeitsarbeit-Bot.bin
