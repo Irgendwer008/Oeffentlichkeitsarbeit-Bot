@@ -23,7 +23,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
 
 
 
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get("https://venyoo.de/home")
     
