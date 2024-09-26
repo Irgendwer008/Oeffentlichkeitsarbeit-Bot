@@ -19,6 +19,8 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
 
+# Folgendes ist noch in der Entwicklung und funktioniert wahrscheinlich nicht, solange dieser Tet noch hier steht :D
+
 ### Requirements for running Oeffentlichkeitsarbeit-Bot
 
 - **Firefox** is used as browser and therefor also necessary and has to be installed.

@@ -1,1 +1,1 @@
-pyinstaller --onefile --distpath ./ --clean --name Oeffentlichkeitsarbeit-Bot.bin main.py 
+pyinstaller --onefile --distpath ./ --clean --exclude-module credentials --name Oeffentlichkeitsarbeit-Bot.bin main.py 
