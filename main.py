@@ -3,10 +3,10 @@
 from datetime import datetime
 from os.path import exists
 from os.path import abspath
-import time
 from pwinput import pwinput
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from sys import exit
 
 from credentials import _Logindaten
 from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO

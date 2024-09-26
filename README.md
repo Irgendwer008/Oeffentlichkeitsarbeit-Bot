@@ -1,7 +1,7 @@
 # Oeffentlichkeitsarbeit-Bot
 Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. auf Platformen aller Art
 
-### Requirements
+### Requirements for running main.py
 
 all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install -r requirements.txt`
 
@@ -16,6 +16,28 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 - locale **"de_DE"** is [installed](https://ubuntuforums.org/showthread.php?t=196414)
 
 - **Nebenan.de** is set to **german locale** (I don't know if others are even possible, but still.)
+
+- Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
+
+### Requirements for running Oeffentlichkeitsarbeit-Bot
+
+- **Firefox** is used as browser and therefor also necessary and has to be installed.
+
+- locale **"de_DE"** is [installed](https://ubuntuforums.org/showthread.php?t=196414)
+
+- **Nebenan.de** is set to **german locale** (I don't know if others are even possible, but still.)
+
+- Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
+
+### Requirements for binary conversion from main.py to Oeffentlichkeitsarbeit-Bot
+
+all pip-requirements are listed in requirements_for_binary_conversion.txt. To install all at once execute `pip3 install -r requirements.txt`
+
+- Up to date **Python 3** (I assume)
+
+- **Pyinstaller** is needed for the conversion: `pip3 install pyinstaller`
+
+- **Firefox** is used as browser and therefor also necessary and has to be installed.
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
 
