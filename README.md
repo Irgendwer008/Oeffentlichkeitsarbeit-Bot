@@ -3,7 +3,7 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 
 ### Requirements
 
-all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install requirements.txt`
+all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install -r requirements.txt`
 
 - Up to date **Python 3**
 
