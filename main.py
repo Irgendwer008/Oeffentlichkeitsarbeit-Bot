@@ -209,9 +209,9 @@ def get_location() -> list[str, str, str, str]:
             return location, strasse, plz, stadt
 
 def notify_of_rounded_times(beginn: datetime, ende: datetime):
-    if beginn.minute % 30 != 0:
+    if beginn.minute % 30 != 0 and ende.minute % 30 == 0:
         print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Anfangsuhrzeit wird auf " + round_nearest_30min(beginn).strftime("%H:%M") + " gerundet"))
-    elif ende.minute % 30 != 0:
+    elif beginn.minute % 30 == 0 and ende.minute % 30 != 0:
         print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
     elif beginn.minute % 30 != 0 and ende.minute % 30 != 0:
         print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
@@ -271,16 +271,18 @@ def get_kategorien(plugins: list) -> list[str]:
                     while True:
                         print("\nWelche Kategorie soll für \"" + plugin.plugininfo.FRIENDLYNAME + "\" verwendet werden? Bitte gib die entsprechende Zahl (1-" + str(len(plugin.plugininfo.KATEGORIEN)) + ") an: ")
                         for i in range(1, len(available_categories) + 1):
-                            print(" [" + str(i) + "] " + plugin.plugininfo.KATEGORIEN[available_categories[i-1]])
+                            print(" {:<5} ".format(f"[{str(i)}]") + plugin.plugininfo.KATEGORIEN[available_categories[i-1]])
                         try:
                             # try assigning this key to the list
-                            ausgewählte_kategorien.append(plugin.plugininfo.KATEGORIEN[available_categories[int(input("> "))-1]])
+                            ausgewählte_kategorien.append(available_categories[int(input("> "))-1])
                             print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[ausgewählte_kategorien[-1]] + "\" verwenden.")
                             break
                         except KeyboardInterrupt as e:
                             raise e
                         except Exception as e:
-                            print("\nThat is not a valid option!\n")
+                            # here for debuggin purposes
+                            raise e
+                            print("\nDies ist keine valide Option!\n")
                             
             # little easter egg, if you will
             those_are_the_default_values_tho = True
@@ -410,7 +412,7 @@ if __name__ == "__main__":
         reset_screen(heading="Plugins")
         plugins = get_plugins()
         print_current_plugins(plugins)
-             
+        
         # Z10 user account
         if Z10Website in plugins:
             reset_screen(heading="Z10 Benutzerkonto")
