@@ -2,21 +2,21 @@ from dataclasses import dataclass
 
 @dataclass
 class _Logindaten:
-    # Kalender Karlsruhe
-    KALENDERKARLSRUHE_EMAIL = ""
-    KALENDERKARLSRUHE_PASSWORD = ""
-    # Nebenan.de
-    NEBENANDE_EMAIL = ""
-    NEBENANDE_PASSWORD = ""
-    # Instagram (für Meta Business Suite)
-    INSTAGRAM_USERNAME = ""
-    INSTAGRAM_PASSWORD = ""
-    # StuWe
-    STUWE_USERNAME = ""
-    STUWE_PASSWORD = ""
     # Z10
-    Z10_USERNAME = ""
-    Z10_PASSWORD = ""
+    Z10_USERNAME: str = "" # Leave empty, will be populated at runtime
+    Z10_PASSWORD: str = "" # Leave empty, will be populated at runtime
+    # Kalender Karlsruhe
+    KALENDERKARLSRUHE_EMAIL: str = ""
+    KALENDERKARLSRUHE_PASSWORD: str = ""
+    # Nebenan.de
+    NEBENANDE_EMAIL: str = ""
+    NEBENANDE_PASSWORD: str = ""
+    # Instagram (für Meta Business Suite)
+    INSTAGRAM_USERNAME: str = ""
+    INSTAGRAM_PASSWORD: str = ""
+    # StuWe
+    STUWE_USERNAME: str = ""
+    STUWE_PASSWORD: str = ""
     # Venyoo
-    VENYOO_USERNAME = ""
-    VENYOO_PASSWORD = ""
+    VENYOO_USERNAME: str = ""
+    VENYOO_PASSWORD: str = ""

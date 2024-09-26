@@ -11,32 +11,93 @@ from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO
     
 import KalenderKarlsruhe
 import Nebenande
-import Meta
 import StuWe
 import Z10Website
 import Venyoo
-plugins = [Venyoo]
+plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
 
 from os.path import abspath
     
-#TODO: check for valid values: locale (datepicker nebenan.de)
-#TODO: Make categories functional
-#TODO: Allow choosing of which plugins to use
 #TODO: Check if events where published correctly (prob takes much time :,) )
-#TODO: limit text lengths: Nebenande: titel: 2 <= text <= 60, Beschreibung: 2 <= text <= 5000
-#TODO: add adding of default category to helper.Veranstaltungsdetails.AUSGEWÄHLTE_KATEGORIE
 #TODO: try facebok-sdk (see link at top of Meta.py)
-#TODO: implement user input for all details (see class Veranstaltungsdetails and Z10-login: class _Logindaten)
 #TODO: Get actual available categories from websites
+#TODO: Add a lot of comments for better readability :D
+#TODO: Add summary for double checking before starting uploading
+
+def get_plugins() -> list:
+    while True:
+        # print all available plugins with number
+        print("\n# Auf welchen Platformen soll die Veranstaltung veröffentlicht werden? Gib \"Alle\" wenn alle Plugins, oder die entsprechende(n) Zahl(en), mit Komma getrennt, an:\n")
+        for i in range(1, len(plugins) + 1):
+            print(" [" + str(i) + "] " + plugins[i-1].plugininfo.FRIENDLYNAME)
+            
+        # recieve answer
+        answer = input("\n> ")
+        
+        # check, if "Alle" was selected
+        if answer in ["Alle", "alle"]:
+            return plugins
+        
+        # if not, split the answer-string at every comma
+        choices = answer.split(",")
+            
+        # Catch invalid input
+        try:
+            if len(choices) < 1:            # Catch no input
+                raise Exception
+            
+            choices = set(choices)          # remove duplicate numbers and sort
+                
+            new_plugins_list = []
+            
+            for choice in choices:          # Iterate over every given choice
+                number = int(choice) - 1    # Catch choice not a integer
+                if number not in range(0, len(plugins)):    # Catch number out of range
+                    raise Exception
+                new_plugins_list.append(plugins[number])
+            
+            return new_plugins_list
+                
+                
+        except:
+            pass
+        print("\n!! Deine Eingabe war fehlerhaft. Bitte versuche es erneut.")
+            
+def print_current_plugins():
+    print("\ni Es werden folgende Plugins verwendet werden: \n")
+    for plugin in plugins:
+        print("  " + plugin.plugininfo.FRIENDLYNAME)
+    
+def get_Z10_credetials() -> tuple[str, str]:
+    try:
+        if Z10Website in plugins:
+            pass
+    except:
+            return ("", "")
+    
+    username = ""
+    password = ""
+    
+    while username == "":
+        username = input("\n# Wie lautet dein Z10-Benutzername (Kürzel)?: \n> ")
+    while password == "":
+        password = input("\n# Wie lautet dein Z10-Passwort?: \n> ")
+        
+    return (username, password)    
 
 def get_name() -> str:
     name = ""
     while name == "":
         name = input("\n# Wie lautet der Titel der Veranstaltung?: \n> ")
+        
+        # check length limitations
+        if len(name) not in range (2, 60):
+            print("\n!! Titel muss zwischen einschließlich zwei und 60 Zeichen lang sein!")
+            name = ""
     return name
         
 def get_unterüberschrift() -> str:
-    unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standart ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): \n> ")
+    unterüberschrift = input("\n# Wie lautet die Unterüberschrift der Veranstaltung? (Optional, Standard ist '" + Veranstaltungsdetails.UNTERÜBERSCHRIFT + "'): \n> ")
     if unterüberschrift == "":
         unterüberschrift = Veranstaltungsdetails.UNTERÜBERSCHRIFT
     return unterüberschrift
@@ -45,6 +106,11 @@ def get_beschreibung() -> str:
     beschreibung = ""
     while beschreibung == "":
         beschreibung = input("\n# Wie lautet die Beschreibung der Veranstaltung?: \n> ")
+        
+        # check length limitations
+        if len(beschreibung) not in range (2, 5000):
+            print("\n!! Beschreibung muss zwischen einschließlich zwei und 60 Zeichen lang sein!")
+            beschreibung = ""
     return beschreibung
 
 def get_beginn() -> datetime:
@@ -80,6 +146,44 @@ def get_ende(veranstaltungsbeginn) -> datetime:
             print("\n!! Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest.")
     return veranstaltungsende
 
+def get_location() -> list[str, str, str, str]:
+    while True:
+        answer = input("\n# Ist die Location / Venue \"" + Veranstaltungsdetails.LOCATION + "\" und die Addresse \"" + Veranstaltungsdetails.STRASSE + ", " + Veranstaltungsdetails.PLZ + " " + Veranstaltungsdetails.STADT + "\" zutreffend?: [Y/n]\n\n> ")
+        
+        # if default should be kept, break
+        yes = YES
+        yes.append("")
+        if answer in yes:
+            return Veranstaltungsdetails.LOCATION, Veranstaltungsdetails.STRASSE, Veranstaltungsdetails.PLZ, Veranstaltungsdetails.STADT
+        
+        # elif not, ask for new values. Else retry for valid input
+        elif answer in NO:
+            
+            # Location
+            location = ""
+            while location == "":
+                location = input("\n# Wie lautet die Location / Venue der Veranstaltung? (Optional, Standard ist '" + Veranstaltungsdetails.LOCATION + "'): \n> ")
+            
+            # Straße
+            strasse = ""
+            while strasse == "":
+                strasse = input("\n# Wie lautet die Straße der Addresse? (Optional, Standard ist '" + Veranstaltungsdetails.STRASSE + "'): \n> ")
+            
+            # Location
+            plz = ""
+            while plz == "":
+                try:
+                    plz = str(int(input("\n# Wie lautet die PLZ der Addresse? (Optional, Standard ist '" + Veranstaltungsdetails.PLZ + "'): \n> ")))
+                except:
+                    print("\n!! Bitte nenne eine valide PLZ!")
+            
+            # Location
+            stadt = ""
+            while stadt == "":
+                stadt = input("\n# Wie lautet die Stadt der Addresse? (Optional, Standard ist '" + Veranstaltungsdetails.STADT + "'): \n> ")
+            
+            return location, strasse, plz, stadt
+
 def notify_of_rounded_times(beginn: datetime, ende: datetime):
     if beginn.minute % 30 != 0:
         print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die Angegebenen Uhrzeiten werden gerundet auf " + round_nearest_30min(beginn).strftime("%H:%M"), end="")
@@ -89,13 +193,6 @@ def notify_of_rounded_times(beginn: datetime, ende: datetime):
         
         print("")
     return
-
-def get_bild() -> str:
-    filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
-        
-    while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
-        filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
-    return abspath(filepath)
     
 def get_kategorien() -> list[str]:
     default_categories = ""
@@ -112,7 +209,7 @@ def get_kategorien() -> list[str]:
     
     while True:
         # dynamically generate question
-        askstring = "\nSollen die Standartkategorien\n\n"            
+        askstring = "\nSollen die Standardkategorien\n\n"            
         for plugin in plugins:
             # add line, if this plugin uses categories
             if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
@@ -123,7 +220,9 @@ def get_kategorien() -> list[str]:
         default_categories = input(askstring)
         
         # if so, break
-        if default_categories in [YES, ""]:
+        yes = YES
+        yes.append("")
+        if default_categories in yes:
             for plugin in plugins:
                 ausgewählte_kategorien.append(plugin.plugininfo.DEFAULTCATEGORY_KEY)
             break
@@ -163,6 +262,19 @@ def get_kategorien() -> list[str]:
     
     return ausgewählte_kategorien
 
+def get_bild() -> str:
+    filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
+        
+    while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
+        filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
+    return abspath(filepath)
+
+def get_link() -> str:
+    link = input("\n# Wie lautet der Link ? (Optional, Standard ist '" + Veranstaltungsdetails.LINK + "'): \n> ")
+    if link == "":
+        link = Veranstaltungsdetails.LINK
+    return link
+
 if __name__ == "__main__":
     
     print("######################")
@@ -173,21 +285,57 @@ if __name__ == "__main__":
     
     # Get event details
     try:
-        # Values may be hardcorded here for faster Testing of plugins so that one doesn't have to type every detail every time
-        details = Veranstaltungsdetails(NAME = "Test", #get_name(), 
-                                        UNTERÜBERSCHRIFT = "Dies ist eine Testbeschreibung", #get_unterüberschrift(),
-                                        BESCHREIBUNG = "Dies ist eine Beispielbeschreibung", #get_beschreibung(),
-                                        BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"), #get_beginn(),
-                                        ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"), #get_ende(veranstaltungsbeginn),
-                                        BILD_DATEIPFAD = abspath("image.jpg"), # get_bild())  
-                                        AUSGEWÄHLTE_KATEGORIE = get_kategorien())
-        notify_of_rounded_times(details.BEGINN, details.ENDE)   
+        get_Z10_credetials()
+        exit()
+        
+        plugins = get_plugins()
+        print_current_plugins()
+        
+        username, password = get_Z10_credetials()
+        
+        name = get_name()
+        unterüberschrift = get_unterüberschrift()
+        beschreibung = get_beschreibung()
+        beginn = get_beginn()
+        ende = get_ende(beginn)
+        location, strasse, plz, stadt = get_location()
+        kategorien = get_kategorien()
+        bild = get_bild()
+        link = get_link()
+    
+        notify_of_rounded_times(beginn, ende)
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
+        
+        
+    details = Veranstaltungsdetails(NAME = name, 
+                                    UNTERÜBERSCHRIFT = unterüberschrift,
+                                    BESCHREIBUNG = beschreibung,
+                                    BEGINN = beginn,
+                                    ENDE = ende,
+                                    LOCATION = location,
+                                    STRASSE = strasse,
+                                    PLZ = plz,
+                                    STADT = stadt,
+                                    BILD_DATEIPFAD = abspath(bild),
+                                    LINK = link,
+                                    AUSGEWÄHLTE_KATEGORIE = kategorien)
+    
+    # Values may be *temporarily* hardcorded here for faster Testing of plugins so that one doesn't have to type every detail every time. Comment for normal functionality
+    
+    details = Veranstaltungsdetails(NAME = "Test",
+                                    UNTERÜBERSCHRIFT = "Dies ist eine Testbeschreibung",
+                                    BESCHREIBUNG = "Dies ist eine Beispielbeschreibung",
+                                    BEGINN = datetime.strptime("31.10.2024 20:00", "%d.%m.%Y %H:%M"),
+                                    ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"),
+                                    BILD_DATEIPFAD = abspath("image.jpg"),
+                                    AUSGEWÄHLTE_KATEGORIE = kategorien)
+    
     
     # Get login credentials
-    credentials = _Logindaten
+    credentials = _Logindaten(Z10_USERNAME = username,
+                              Z10_PASSWORD = password)
     
     # init driver    
     options = Options()
@@ -195,7 +343,6 @@ if __name__ == "__main__":
     options.add_argument("--disable-extensions")
     options.set_preference("permissions.default.desktop-notification", 2)
     #options.add_argument("--headless")
-
     driver = webdriver.Firefox(options=options)
     
     # Newline
