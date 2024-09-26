@@ -1,5 +1,23 @@
 #!/usr/bin/env python
 
+import argparse
+
+# Get Command Line argument handling
+parser = argparse.ArgumentParser(
+    description = "Automatisiertes Veröffentlichen von Events auf einer Reihe von Platformen",
+    epilog = "Mehr auf Github: https://github.com/Irgendwer008/Oeffentlichkeitsarbeit-Bot")
+
+parser.add_argument(
+    "-w", 
+    "--not-headless", 
+    dest="headless", 
+    default=True, 
+    action="store_false", 
+    help="Ist diese Flagge gesetzt öffnet sich Firefox als Fenster. Wenn nicht, läuft es nur im Hintergrund")
+
+parser.set_defaults(flag=True)
+args = parser.parse_args()
+
 from datetime import datetime
 from os.path import exists
 from os.path import abspath
@@ -7,6 +25,7 @@ from pwinput import pwinput
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from sys import exit
+
 
 from credentials import _Logindaten
 from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
@@ -28,6 +47,8 @@ from os.path import abspath
 #TODO: Venyoo working custom category
 #TODO: Way to go back one step and change previous input
 #TODO: Wrap Beschreibung in Overview
+
+
 
 def get_plugins() -> list:
     while True:
@@ -242,7 +263,7 @@ def get_kategorien(plugins: list) -> list[str]:
                     ausgewählte_kategorien.append(None)
                 # if it does use categories, ask which one should be used and assign it's key to the list
                 else:
-                    available_categories = plugin.plugininfo.KATEGORIEN.keys()
+                    available_categories = list(plugin.plugininfo.KATEGORIEN.keys())
                     while True:
                         print("\nWelche Kategorie soll für \"" + plugin.plugininfo.FRIENDLYNAME + "\" verwendet werden? Bitte gib die entsprechende Zahl (1-" + str(len(plugin.plugininfo.KATEGORIEN)) + ") an: ")
                         for i in range(1, len(available_categories) + 1):
@@ -250,7 +271,7 @@ def get_kategorien(plugins: list) -> list[str]:
                         try:
                             # try assigning this key to the list
                             ausgewählte_kategorien.append(plugin.plugininfo.KATEGORIEN[available_categories[int(input("> "))-1]])
-                            print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[available_categories[-1]] + "\" verwenden.")
+                            print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[ausgewählte_kategorien[-1]] + "\" verwenden.")
                             break
                         except KeyboardInterrupt as e:
                             raise e
@@ -449,7 +470,8 @@ if __name__ == "__main__":
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-extensions")
     options.set_preference("permissions.default.desktop-notification", 2)
-    options.add_argument("--headless")
+    if args.headless:
+        options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     
     # Newline
