@@ -7,11 +7,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 
-from helper import Veranstaltungsdetails, PluginInfo
+from helper import Veranstaltungsdetails, PluginInfo, step
 from credentials import _Logindaten
 
 plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
-                        DEFAULTCATEGORY_KEY="1444", # Set to None (not "None" :D), if this platform doesn't use categories
+                        DEFAULTCATEGORY_KEY="1444", #Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={"1444": "Musik",
                          "1445": "Theater, Tanz",
                          "1443": "Literatur, Vorträge",
@@ -31,8 +31,7 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     time.sleep(1)
 
 
-    # Login
-    
+    step("Einloggen")
     email_field = driver.find_element(By.NAME, "email")
     email_field.send_keys(credentials.KALENDERKARLSRUHE_EMAIL)
 
@@ -41,52 +40,49 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
 
     driver.find_element(By.ID, "reformloginmail$").click()
 
-    # Waiting for page loading
+    step("Lädt Seite...")
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "reform")))
-    
 
-    # Filling out form
-
-    ## Kategorie
+    step("Kategorie")
     Select(driver.find_element(By.ID, "reformField1")).select_by_value(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])])
 
-    ## Name der Veranstaltung
+    step("Name der Veranstaltung")
     driver.find_element(By.ID, "reformField2").send_keys(details.NAME)
 
-    ## Unterüberschrift der Veranstaltung
+    step("Unterüberschrift der Veranstaltung")
     driver.find_element(By.ID, "reformField3").send_keys(details.UNTERÜBERSCHRIFT)
 
     if (details.BESCHREIBUNG != ""):
-        ## Beschreibung der Veranstaltung
+        step("Beschreibung der Veranstaltung")
         driver.find_element(By.ID, "reformField4").send_keys(details.BESCHREIBUNG)
 
-    ## Beginn der Veranstaltung: Datum
+    step("Beginn der Veranstaltung: Datum")
     driver.find_element(By.ID, "reformField5-dt").send_keys(details.BEGINN.strftime("%Y-%m-%d"))
 
-    ## Beginn der Veranstaltung: Uhrzeit
+    step("Beginn der Veranstaltung: Uhrzeit")
     driver.find_element(By.ID, "reformField5-tm").send_keys(details.BEGINN.strftime("%H:%M"))
 
     if (details.ENDE is not None):
-        ## Ende der Veranstaltung: Datum
+        step("Ende der Veranstaltung: Datum")
         driver.find_element(By.ID, "reformField6-dt").send_keys(details.ENDE.strftime("%Y-%m-%d"))
 
-        ## Ende der Veranstaltung: Uhrzeit
+        step("Ende der Veranstaltung: Uhrzeit")
         driver.find_element(By.ID, "reformField6-tm").send_keys(details.ENDE.strftime("%H:%M"))
 
-    ## Veranstalungsort
+    step("Veranstalungsort")
     driver.find_element(By.ID, "reformField8_chosen").find_element(By.CLASS_NAME, "chosen-single").click()
     driver.find_element(By.ID, "reformField8_chosen").find_element(By.TAG_NAME, "input").send_keys("Z10" + Keys.TAB)
 
-    ## Veranstalter
+    step("Veranstalter")
     driver.find_element(By.ID, "reformField9_chosen").find_element(By.CLASS_NAME, "chosen-single").click()
     driver.find_element(By.ID, "reformField9_chosen").find_element(By.TAG_NAME, "input").send_keys("Studentenzentrum Z10 e.V." + Keys.TAB)
 
-    ## Webadresse
+    step("Link")
     driver.find_element(By.ID, "reformField10").send_keys(details.LINK)
 
-    ## Bild
+    step("Bild")
     driver.find_element(By.ID, "reformField12").send_keys(details.BILD_DATEIPFAD)
 
 
-    # Send form
+    step("Erstellen")
     driver.find_element(By.ID, "reformcreate$").click()

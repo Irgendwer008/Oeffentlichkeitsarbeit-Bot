@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
 from credentials import _Logindaten
 
-plugininfo = PluginInfo(FRIENDLYNAME="StuWe",
+plugininfo = PluginInfo(FRIENDLYNAME="StuWe Veranstaltungskalender",
                         DEFAULTCATEGORY_KEY=None, # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={})
 

@@ -24,6 +24,7 @@ from os.path import abspath
 #TODO: Get actual available categories from websites
 #TODO: Add a lot of comments for better readability :D
 #TODO: Add summary for double checking before starting uploading
+#TODO: Change significant comments to step() in all plugins
 
 def get_plugins() -> list:
     while True:
@@ -149,7 +150,7 @@ def get_ende(veranstaltungsbeginn) -> datetime:
 
 def get_location() -> list[str, str, str, str]:
     while True:
-        answer = input("\n# Ist die Location / Venue \"" + Veranstaltungsdetails.LOCATION + "\" und die Addresse \"" + Veranstaltungsdetails.STRASSE + ", " + Veranstaltungsdetails.PLZ + " " + Veranstaltungsdetails.STADT + "\" zutreffend?: [Y/n]\n\n> ")
+        answer = input("\n# Ist die Location / Venue \"" + Veranstaltungsdetails.LOCATION + "\" und die Addresse \"" + Veranstaltungsdetails.STRASSE + ", " + Veranstaltungsdetails.PLZ + " " + Veranstaltungsdetails.STADT + "\" zutreffend?: [Y/n]\n> ")
         
         # if default should be kept, break
         yes = YES

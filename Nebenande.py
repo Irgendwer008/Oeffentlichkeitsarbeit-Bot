@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
-from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min
+from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
 from credentials import _Logindaten
 
 plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
@@ -32,25 +32,18 @@ plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
 
 def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
     
-    
-    # Open Website
-    
+    step("Open Website")
     driver.get("https://gewerbe.nebenan.de/businesses/190915/feed")
     
     
-    # Decline cookies
-    
+    step("Declining cookies")
     WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, '[title="SP Consent message"]')))
-    
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".message-component.message-button.no-children.focusable.sp_choice_type_13"))).click()
-    
     driver.switch_to.default_content()
-    
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, "email")))
 
 
-    # Login
-    
+    step("Einloggen")    
     email_field = driver.find_element(By.NAME, "email")
     email_field.send_keys(credentials.NEBENANDE_EMAIL)
 
@@ -61,23 +54,18 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     
      
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "article")))
-    
-    time.sleep(2)
+    time.sleep(1)
 
 
-    # Open dialogue
-    
+    step("Formular öffnen")
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
     
-    
-    # Filling out Form
-    
-    ## Titel und Veranstaltungsort
+    step("Titel und Veranstaltungsort")
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
         driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Name der Veranstaltung"]'))).send_keys(details.NAME)
     driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Ort der Veranstaltung"]').send_keys(details.STRASSE)
     
-    ## Beginn: Tag
+    step("Beginn: Tag")
     driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Tag"]').click()
         
     locale.setlocale(locale.LC_TIME, "de_DE.UTF8")    
@@ -92,16 +80,16 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
         except NoSuchElementException:
             pass
     
-    ## Beginn: Uhrzeit
+    step("Beginn: Uhrzeit")
     Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text(round_nearest_30min(details.BEGINN).strftime("%H:%M"))
     
-    ## Ende
+    step("Ende")
     if (details.ENDE is not None):
         
         driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/article[2]/ul/li/span").click()
         driver.find_elements(By.TAG_NAME, "input")[3].click()
         
-        ## Ende: Tag 
+        step("Ende: Tag")
         
         while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.BEGINN.strftime("%B %Y")):
             driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
@@ -113,20 +101,20 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
             except NoSuchElementException:
                 pass
         
-        ## Ende: Uhrzeit
+        step("Ende: Uhrzeit")
         Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.ENDE, True).strftime("%H:%M"))    
     
-    ## Beschreibung
+    step("Beschreibung")
     driver.find_element(By.CSS_SELECTOR, "textarea[placeholder=\"Deine Veranstaltungsbeschreibung\"]").send_keys(details.BESCHREIBUNG)
     
-    ## Bild
+    step("Bild")
     driver.find_element(By.CLASS_NAME, "c-file_picker-input").send_keys(details.BILD_DATEIPFAD)
     time.sleep(1)
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/footer/span[1]"))).click()
         
-    ## Kategorie
+    step("Kategorie")
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
             
-    ## Submit
+    step("Speichern")
     driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()

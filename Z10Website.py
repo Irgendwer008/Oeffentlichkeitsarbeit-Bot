@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import Select
 from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
 from credentials import _Logindaten
 
-plugininfo = PluginInfo(FRIENDLYNAME="Z10 Homepage + Wiki Termin",
+plugininfo = PluginInfo(FRIENDLYNAME="Z10 Homepage + Wiki",
                         DEFAULTCATEGORY_KEY="5", # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={"9": "Filme",
                                     "18": "Geilster Tag des Monats",
