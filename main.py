@@ -3,6 +3,7 @@
 from datetime import datetime
 from os.path import exists
 from os.path import abspath
+import time
 from pwinput import pwinput
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -25,6 +26,7 @@ from os.path import abspath
 #TODO: Add a lot of comments for better readability :D
 #TODO: Add summary for double checking before starting uploading
 #TODO: Change significant comments to step() in all plugins
+#TODO: StuWe Dates not working
 
 def get_plugins() -> list:
     while True:
@@ -69,6 +71,7 @@ def print_current_plugins():
     print("\ni Es werden folgende Plugins verwendet werden: \n")
     for plugin in plugins:
         print("  " + plugin.plugininfo.FRIENDLYNAME)
+    time.sleep(1)
     
 def get_Z10_credetials() -> tuple[str, str]:
     try:
@@ -188,12 +191,16 @@ def get_location() -> list[str, str, str, str]:
 
 def notify_of_rounded_times(beginn: datetime, ende: datetime):
     if beginn.minute % 30 != 0:
-        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die Angegebenen Uhrzeiten werden gerundet auf " + round_nearest_30min(beginn).strftime("%H:%M"), end="")
+        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Anfangsuhrzeit wird auf " + round_nearest_30min(beginn).strftime("%H:%M"), end=" gerundet")
+    elif ende is not None and ende.minute % 30 != 0:
+        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet")
+    elif beginn.minute % 30 != 0 and ende is not None and ende.minute % 30 != 0:
+        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet")
 
-        if ende is not None and ende.minute % 30 != 0:
-            print(" bzw. " + round_nearest_30min(ende, True).strftime("%H:%M"), end="")
-        
-        print("")
+    print("")
+    
+    time.sleep(1)
+    
     return
     
 def get_kategorien() -> list[str]:
@@ -297,12 +304,11 @@ if __name__ == "__main__":
         beschreibung = get_beschreibung()
         beginn = get_beginn()
         ende = get_ende(beginn)
+        notify_of_rounded_times(beginn, ende)
         location, strasse, plz, stadt = get_location()
         kategorien = get_kategorien()
         bild = get_bild()
         link = get_link()
-    
-        notify_of_rounded_times(beginn, ende)
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
         exit()
@@ -322,6 +328,7 @@ if __name__ == "__main__":
                                     AUSGEWÄHLTE_KATEGORIE = kategorien)
     
     # Values may be *temporarily* hardcorded here for faster Testing of plugins so that one doesn't have to type every detail every time. Comment for normal functionality
+    """
     details = Veranstaltungsdetails(NAME = "Test",
                                     UNTERÜBERSCHRIFT = "Dies ist eine Testbeschreibung",
                                     BESCHREIBUNG = "Dies ist eine Beispielbeschreibung",
@@ -329,7 +336,7 @@ if __name__ == "__main__":
                                     ENDE = datetime.strptime("31.10.2024 23:50", "%d.%m.%Y %H:%M"),
                                     BILD_DATEIPFAD = abspath("image.jpg"),
                                     AUSGEWÄHLTE_KATEGORIE = kategorien)
-    
+    """
     
     # Get login credentials
     credentials = _Logindaten(Z10_USERNAME = username,
@@ -350,8 +357,14 @@ if __name__ == "__main__":
     try:
         lastsuccesful = 0
         for plugin in plugins:
-            plugin.run(details, credentials, plugins, driver)
-            print("Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht.")
+            try:
+                plugin.run(details, credentials, plugins, driver)
+                print("Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht.")
+            except KeyboardInterrupt as e:
+                raise e
+            except Exception as e:
+                print("\n\n" + e.with_traceback + "\n\n")
+                print("\n\n!!Achtung!! Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n")
             lastsuccesful += 1
         driver.quit()
     except KeyboardInterrupt:
