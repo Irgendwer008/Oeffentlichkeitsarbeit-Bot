@@ -337,7 +337,6 @@ if __name__ == "__main__":
                                     BILD_DATEIPFAD = abspath("image.jpg"),
                                     AUSGEWÄHLTE_KATEGORIE = kategorien)
     """
-    exit()
     
     # Get login credentials
     credentials = _Logindaten(Z10_USERNAME = username,
