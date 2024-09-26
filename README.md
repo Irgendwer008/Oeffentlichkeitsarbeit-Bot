@@ -3,15 +3,21 @@ Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. a
 
 ### Requirements
 
+all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install requirements.txt`
+
 - Up to date **Python 3**
 
 - **Selenium** is needed as it does all the web automation: `pip3 install selenium`
+
+- **pwinput** is needed for the secret password prompt: `pip3 install pwinput`
 
 - **Firefox** is used as browser and therefor also necessary and has to be installed.
 
 - locale **"de_DE"** is [installed](https://ubuntuforums.org/showthread.php?t=196414)
 
 - **Nebenan.de** is set to **german locale** (I don't know if others are even possible, but still.)
+
+- Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
 
 ### Allowed Image Files
 - *.png

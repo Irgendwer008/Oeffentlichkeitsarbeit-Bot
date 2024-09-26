@@ -3,6 +3,7 @@
 from datetime import datetime
 from os.path import exists
 from os.path import abspath
+from pwinput import pwinput
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
@@ -35,7 +36,7 @@ def get_plugins() -> list:
         answer = input("\n> ")
         
         # check, if "Alle" was selected
-        if answer in ["Alle", "alle"]:
+        if answer.lower() in ["alle", "allen", "all"]:
             return plugins
         
         # if not, split the answer-string at every comma
@@ -81,7 +82,7 @@ def get_Z10_credetials() -> tuple[str, str]:
     while username == "":
         username = input("\n# Wie lautet dein Z10-Benutzername (Kürzel)?: \n> ")
     while password == "":
-        password = input("\n# Wie lautet dein Z10-Passwort?: \n> ")
+        password = pwinput("\n# Wie lautet dein Z10-Passwort?: \n> ", "*")
         
     return (username, password)    
 
@@ -284,10 +285,7 @@ if __name__ == "__main__":
     print("######################")
     
     # Get event details
-    try:
-        get_Z10_credetials()
-        exit()
-        
+    try:        
         plugins = get_plugins()
         print_current_plugins()
         
@@ -323,7 +321,6 @@ if __name__ == "__main__":
                                     AUSGEWÄHLTE_KATEGORIE = kategorien)
     
     # Values may be *temporarily* hardcorded here for faster Testing of plugins so that one doesn't have to type every detail every time. Comment for normal functionality
-    
     details = Veranstaltungsdetails(NAME = "Test",
                                     UNTERÜBERSCHRIFT = "Dies ist eine Testbeschreibung",
                                     BESCHREIBUNG = "Dies ist eine Beispielbeschreibung",
