@@ -1,8 +1,42 @@
 #!/usr/bin/env python
 
 import argparse
+from datetime import datetime
+from os.path import exists
+from os.path import abspath
+from pwinput import pwinput
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from sys import exit
+from os.path import abspath
 
-# Get Command Line argument handling
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from credentials import Logindaten
+from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
+    
+import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
+import Plugins.Nebenande as Nebenande
+import Plugins.StuWe as StuWe
+import Plugins.Z10Website as Z10Website
+import Plugins.Venyoo as Venyoo
+available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
+
+
+
+#TODO: Check if events where published correctly (prob takes much time :,) )
+#TODO: try facebok-sdk (see link at top of Meta.py)
+#TODO: Get actual available categories from websites
+#TODO: Add a lot of comments for better readability :D
+#TODO: Add docstrings for better readability :D
+#TODO: Venyoo working custom category
+#TODO: Way to go back one step and change previous input
+#TODO: Wrap Beschreibung in Overview
+#TODO: add credentials import from seperate file
+
+
+
+# Allow command line argument handling
 parser = argparse.ArgumentParser(
     description = "Automatisiertes Veröffentlichen von Events auf einer Reihe von Platformen",
     epilog = "Mehr auf Github: https://github.com/Irgendwer008/Oeffentlichkeitsarbeit-Bot")
@@ -17,37 +51,6 @@ parser.add_argument(
 
 parser.set_defaults(flag=True)
 args = parser.parse_args()
-
-from datetime import datetime
-from os.path import exists
-from os.path import abspath
-from pwinput import pwinput
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from sys import exit
-
-
-from credentials import _Logindaten
-from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
-    
-import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
-import Plugins.Nebenande as Nebenande
-import Plugins.StuWe as StuWe
-import Plugins.Z10Website as Z10Website
-import Plugins.Venyoo as Venyoo
-available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
-
-from os.path import abspath
-    
-#TODO: Check if events where published correctly (prob takes much time :,) )
-#TODO: try facebok-sdk (see link at top of Meta.py)
-#TODO: Get actual available categories from websites
-#TODO: Add a lot of comments for better readability :D
-#TODO: Add docstrings for better readability :D
-#TODO: Venyoo working custom category
-#TODO: Way to go back one step and change previous input
-#TODO: Wrap Beschreibung in Overview
-#TODO: add credentials import from seperate file
 
 
 
@@ -305,7 +308,7 @@ def get_link() -> str:
         link = Veranstaltungsdetails.LINK
     return link
 
-def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: _Logindaten):
+def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Logindaten):
     print(format.info("Hier kannst du die eingegebenen Daten überprüfen. Schaue noch einmal gut drüber, denn nach dem Veröffentlichen müssen Änderungen manuell auf jeder Platform einzeln angewendet werden: \n"))
     
     ## Plugins
@@ -459,7 +462,7 @@ if __name__ == "__main__":
                                     AUSGEWÄHLTE_KATEGORIE = kategorien)
     
     # Enter necessary login credentials
-    credentials = _Logindaten(Z10_USERNAME = username,
+    credentials = Logindaten(Z10_USERNAME = username,
                               Z10_PASSWORD = password)
     
     # Print summary

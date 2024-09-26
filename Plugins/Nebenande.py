@@ -7,9 +7,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from typing import TYPE_CHECKING
 
 from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
-from credentials import _Logindaten
+if TYPE_CHECKING:
+    from credentials import Logindaten
 
 plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
                         DEFAULTCATEGORY_KEY="2", # Set to None (not "None" :D), if this platform doesn't use categories
@@ -30,7 +32,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
                          "14": "Ausflüge",
                          "15": "Sonstiges"})
 
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     step("Open Website")
     driver.get("https://gewerbe.nebenan.de/businesses/190915/feed")

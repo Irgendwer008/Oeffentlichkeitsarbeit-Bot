@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class _Logindaten:
+class Logindaten:
     # Z10
     Z10_USERNAME: str = "" # Leave empty, will be populated at runtime
     Z10_PASSWORD: str = "" # Leave empty, will be populated at runtime

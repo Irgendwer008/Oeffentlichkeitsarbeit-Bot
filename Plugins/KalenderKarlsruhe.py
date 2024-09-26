@@ -6,9 +6,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from credentials import Logindaten
 
-from helper import Veranstaltungsdetails, PluginInfo, step
-from credentials import _Logindaten
+from helper import Veranstaltungsdetails, PluginInfo, step 
 
 plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
                         DEFAULTCATEGORY_KEY="1444", #Set to None (not "None" :D), if this platform doesn't use categories
@@ -22,7 +24,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
                          "6": "Stadtleben",
                          "14": "Sport"})
 
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 

@@ -1,17 +1,15 @@
 from datetime import datetime
-import sys
 import time
 import locale
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
+from typing import TYPE_CHECKING
 
 from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
-from credentials import _Logindaten
+if TYPE_CHECKING:
+    from credentials import Logindaten
 try:
     import Z10Website
 except:
@@ -23,7 +21,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
 
 
 
-def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get("https://venyoo.de/home")
     
