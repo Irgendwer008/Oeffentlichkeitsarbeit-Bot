@@ -1,1 +1,1 @@
-pyinstaller --onefile --distpath ./ --clean --name Oeffentlichkeitsarbeit-Bot main.py 
+pyinstaller --onefile --distpath ./ --clean --name Oeffentlichkeitsarbeit-Bot.bin main.py 

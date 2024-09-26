@@ -47,6 +47,7 @@ from os.path import abspath
 #TODO: Venyoo working custom category
 #TODO: Way to go back one step and change previous input
 #TODO: Wrap Beschreibung in Overview
+#TODO: add credentials import from seperate file
 
 
 
