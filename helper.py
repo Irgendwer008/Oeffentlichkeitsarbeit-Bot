@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from inspect import stack, getmodule
-
+import shutil
 YES = ["Y", "y", "Yes", "yes", "Ja", "ja"]
 NO = ["N", "n", "No", "no", "Nein", "nein"]
 
@@ -43,3 +43,49 @@ def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
 
 def step(text: str):
     print(getmodule(stack()[1][0]).plugininfo.FRIENDLYNAME + ": " + text + "                                                             ", end="\r")
+
+def reset_screen(heading: str = None):
+    print(chr(27) + "[H" + chr(27) + "[J", end="")
+    
+    print(format.BOLD, end="")
+    
+    print("######################")
+    print("#                    #")
+    print("#  Z10 Autouploader  #")
+    print("#                    #")
+    print("######################")
+    
+    print(format.CLEAR, end="")
+    
+    print(format.info("Drücke jederzeit <Ctrl> + <C>, um das Programm zu beenden."))
+    
+    if heading is not None:
+        # Print heading
+        print(format.bold(heading))
+        
+        # Print heading underline
+        print("\u2558", end="")
+        for i in range(0, len(heading) + 2):
+            print("\u2550", end="")
+        print("\u255B")
+    else:
+        print("")
+
+    
+class format:
+    CLEAR = "\033[0m"
+    BOLD = "\033[1m"
+    INFO = "\033[38;5;14m"
+    WARNING = "\033[38;5;9m"
+    INFO_ICON = "\U0001F6C8"
+    WARNING_ICON = "\u26A0" 
+    
+    def bold(text: str) -> str:
+        return format.BOLD + "\n  " + text + format.CLEAR
+
+    def info(text: str) -> str:
+        return format.INFO + "\n" + format.INFO_ICON + " " + text + format.CLEAR
+
+    def error(text: str) -> str:
+        reset_screen()
+        return format.WARNING + "\n" + format.WARNING_ICON + " " + text + format.CLEAR

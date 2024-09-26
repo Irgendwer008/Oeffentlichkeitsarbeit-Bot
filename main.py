@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
 from credentials import _Logindaten
-from helper import Veranstaltungsdetails, round_nearest_30min, YES, NO
+from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
     
 import KalenderKarlsruhe
 import Nebenande
@@ -38,6 +38,12 @@ def get_plugins() -> list:
         # recieve answer
         answer = input("\n> ")
         
+        print("\n'" + answer + "'\n")
+        
+        if answer == "^[[A":
+            print("Yay")
+        exit()
+        
         # check, if "Alle" was selected
         if answer.lower() in ["alle", "allen", "all"]:
             return plugins
@@ -65,13 +71,13 @@ def get_plugins() -> list:
                 
         except:
             pass
-        print("\n!! Deine Eingabe war fehlerhaft. Bitte versuche es erneut.")
+        print(format.error("Deine Eingabe war fehlerhaft. Bitte versuche es erneut."))
             
 def print_current_plugins():
-    print("\ni Es werden folgende Plugins verwendet werden: \n")
+    print(format.info("Es werden folgende Plugins verwendet werden: \n"))
     for plugin in plugins:
-        print("  " + plugin.plugininfo.FRIENDLYNAME)
-    time.sleep(1)
+        print(format.INFO + "  " + plugin.plugininfo.FRIENDLYNAME + format.CLEAR)
+    input("\n Zum Vortsetzen, drücke eine beliebige Taste.\n> ")
     
 def get_Z10_credetials() -> tuple[str, str]:
     try:
@@ -97,7 +103,7 @@ def get_name() -> str:
         
         # check length limitations
         if len(name) not in range (2, 60):
-            print("\n!! Titel muss zwischen einschließlich zwei und 60 Zeichen lang sein!")
+            print(format.error("Titel muss zwischen einschließlich zwei und 60 Zeichen lang sein!"))
             name = ""
     return name
         
@@ -114,7 +120,7 @@ def get_beschreibung() -> str:
         
         # check length limitations
         if len(beschreibung) not in range (2, 5000):
-            print("\n!! Beschreibung muss zwischen einschließlich zwei und 60 Zeichen lang sein!")
+            print(format.error("Beschreibung muss zwischen einschließlich zwei und 60 Zeichen lang sein!"))
             beschreibung = ""
     return beschreibung
 
@@ -128,7 +134,7 @@ def get_beginn() -> datetime:
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except:
-            print("\n!! Deine Eingabe hat das falsche Format oder liegt in der Vergangenheit! Bitte gib Datum und Uhrzeit anhand des Beispiels an.")
+            print(format.error("Deine Eingabe hat das falsche Format oder liegt in der Vergangenheit! Bitte gib Datum und Uhrzeit anhand des Beispiels an."))
     return veranstaltungsbeginn
 
 def get_ende(veranstaltungsbeginn) -> datetime:
@@ -148,7 +154,7 @@ def get_ende(veranstaltungsbeginn) -> datetime:
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except:
-            print("\n!! Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest.")
+            print(format.error("Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest."))
     return veranstaltungsende
 
 def get_location() -> list[str, str, str, str]:
@@ -180,7 +186,7 @@ def get_location() -> list[str, str, str, str]:
                 try:
                     plz = str(int(input("\n# Wie lautet die PLZ der Addresse? (Optional, Standard ist '" + Veranstaltungsdetails.PLZ + "'): \n> ")))
                 except:
-                    print("\n!! Bitte nenne eine valide PLZ!")
+                    print(format.error("Bitte nenne eine valide PLZ!"))
             
             # Location
             stadt = ""
@@ -191,11 +197,11 @@ def get_location() -> list[str, str, str, str]:
 
 def notify_of_rounded_times(beginn: datetime, ende: datetime):
     if beginn.minute % 30 != 0:
-        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Anfangsuhrzeit wird auf " + round_nearest_30min(beginn).strftime("%H:%M"), end=" gerundet")
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Anfangsuhrzeit wird auf " + round_nearest_30min(beginn).strftime("%H:%M"), end=" gerundet"))
     elif ende is not None and ende.minute % 30 != 0:
-        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet")
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet"))
     elif beginn.minute % 30 != 0 and ende is not None and ende.minute % 30 != 0:
-        print("\ni Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet")
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet"))
 
     print("")
     
@@ -275,7 +281,7 @@ def get_bild() -> str:
     filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
         
     while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
-        filepath = input("\n!! Bitte nenne einen existierenden dateipfad: ")
+        filepath = input(format.error("Bitte nenne einen existierenden dateipfad: "))
     return abspath(filepath)
 
 def get_link() -> str:
@@ -286,27 +292,33 @@ def get_link() -> str:
 
 if __name__ == "__main__":
     
-    print("######################")
-    print("#                    #")
-    print("#  Z10 Autouploader  #")
-    print("#                    #")
-    print("######################")
-    
     # Get event details
     try:        
+    
+        reset_screen(heading="Plugins")
         plugins = get_plugins()
         print_current_plugins()
         
+        reset_screen(heading="Z10 Benutzerkonto")
         username, password = get_Z10_credetials()
         
+        reset_screen(heading="Titel und Beschreibung")
         name = get_name()
         unterüberschrift = get_unterüberschrift()
-        beschreibung = get_beschreibung()
+        beschreibung=get_beschreibung()
+        
+        reset_screen(heading="Zeiten")
         beginn = get_beginn()
         ende = get_ende(beginn)
         notify_of_rounded_times(beginn, ende)
+        
+        reset_screen(heading="Veranstaltungsort")
         location, strasse, plz, stadt = get_location()
+        
+        reset_screen(heading="Kategorien")
         kategorien = get_kategorien()
+        
+        reset_screen(heading="Bild und Link")
         bild = get_bild()
         link = get_link()
     except KeyboardInterrupt:
@@ -364,14 +376,14 @@ if __name__ == "__main__":
                 raise e
             except Exception as e:
                 print("\n\n" + e.with_traceback + "\n\n")
-                print("\n\n!!Achtung!! Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n")
+                print("\n\n!!Achtung\u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n")
             lastsuccesful += 1
         driver.quit()
     except KeyboardInterrupt:
-        print("\n\n!!Achtung!! Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+        print("\n\n!!Achtung\u26A0 Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
         driver.quit()
     except Exception as e:
-        print("\n\n!!Achtung!! Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n")
+        print("\n\n!!Achtung\u26A0 Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n")
         driver.quit()
         raise e
     
