@@ -52,9 +52,8 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     step("Unterüberschrift der Veranstaltung")
     driver.find_element(By.ID, "reformField3").send_keys(details.UNTERÜBERSCHRIFT)
 
-    if (details.BESCHREIBUNG != ""):
-        step("Beschreibung der Veranstaltung")
-        driver.find_element(By.ID, "reformField4").send_keys(details.BESCHREIBUNG)
+    step("Beschreibung der Veranstaltung")
+    driver.find_element(By.ID, "reformField4").send_keys(details.BESCHREIBUNG)
 
     step("Beginn der Veranstaltung: Datum")
     driver.find_element(By.ID, "reformField5-dt").send_keys(details.BEGINN.strftime("%Y-%m-%d"))
@@ -62,12 +61,11 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     step("Beginn der Veranstaltung: Uhrzeit")
     driver.find_element(By.ID, "reformField5-tm").send_keys(details.BEGINN.strftime("%H:%M"))
 
-    if (details.ENDE is not None):
-        step("Ende der Veranstaltung: Datum")
-        driver.find_element(By.ID, "reformField6-dt").send_keys(details.ENDE.strftime("%Y-%m-%d"))
+    step("Ende der Veranstaltung: Datum")
+    driver.find_element(By.ID, "reformField6-dt").send_keys(details.ENDE.strftime("%Y-%m-%d"))
 
-        step("Ende der Veranstaltung: Uhrzeit")
-        driver.find_element(By.ID, "reformField6-tm").send_keys(details.ENDE.strftime("%H:%M"))
+    step("Ende der Veranstaltung: Uhrzeit")
+    driver.find_element(By.ID, "reformField6-tm").send_keys(details.ENDE.strftime("%H:%M"))
 
     step("Veranstalungsort")
     driver.find_element(By.ID, "reformField8_chosen").find_element(By.CLASS_NAME, "chosen-single").click()

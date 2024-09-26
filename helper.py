@@ -10,9 +10,9 @@ class Veranstaltungsdetails:
     NAME: str 
     BESCHREIBUNG: str
     BEGINN: datetime
+    ENDE: datetime
     BILD_DATEIPFAD: str
     AUSGEWÄHLTE_KATEGORIE: list[str | None] # Number or None, if no category needed existant
-    ENDE: datetime = None # Optional
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
     LOCATION: str = "Studentenzentrum Z10 e.V."
     STRASSE: str = "Zähringerstraße 10"
@@ -89,3 +89,18 @@ class format:
     def error(text: str) -> str:
         reset_screen()
         return format.WARNING + "\n" + format.WARNING_ICON + " " + text + format.CLEAR
+    
+    def overview_print(text: str):
+        print("\u2502 {:<28}\u2551  ".format(text + (":" if text != "" else " ")), end="")
+        
+    def overview_newline():
+        print("\u251C", end="")
+        for i in range(1, 30):
+            print("\u2500", end="")
+        print("\u256B", end="")
+        for i in range(1, 60):
+            print("\u2500", end="")
+        print("")
+        
+    def quote(text: str) -> str:
+        return "\"" + text + "\""

@@ -84,25 +84,23 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text(round_nearest_30min(details.BEGINN).strftime("%H:%M"))
     
     step("Ende")
-    if (details.ENDE is not None):
+    driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/article[2]/ul/li/span").click()
+    driver.find_elements(By.TAG_NAME, "input")[3].click()
+    
+    step("Ende: Tag")
+    
+    while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.BEGINN.strftime("%B %Y")):
+        driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
         
-        driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/article[2]/ul/li/span").click()
-        driver.find_elements(By.TAG_NAME, "input")[3].click()
-        
-        step("Ende: Tag")
-        
-        while (driver.find_element(By.CLASS_NAME, "c-picker-controls-label").text != details.BEGINN.strftime("%B %Y")):
-            driver.find_element(By.CSS_SELECTOR, ".c-picker-controls-next.icon-arrow_right").click()
-            
-        for datebutton in driver.find_elements(By.TAG_NAME, "td"):
-            try:
-                datebutton.find_element(By.XPATH, "//span[text()='" + str(details.BEGINN.day) + "']").click()
-                break
-            except NoSuchElementException:
-                pass
-        
-        step("Ende: Uhrzeit")
-        Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.ENDE, True).strftime("%H:%M"))    
+    for datebutton in driver.find_elements(By.TAG_NAME, "td"):
+        try:
+            datebutton.find_element(By.XPATH, "//span[text()='" + str(details.BEGINN.day) + "']").click()
+            break
+        except NoSuchElementException:
+            pass
+    
+    step("Ende: Uhrzeit")
+    Select(driver.find_element(By.NAME, "endtime_0")).select_by_visible_text(round_nearest_30min(details.ENDE, True).strftime("%H:%M"))    
     
     step("Beschreibung")
     driver.find_element(By.CSS_SELECTOR, "textarea[placeholder=\"Deine Veranstaltungsbeschreibung\"]").send_keys(details.BESCHREIBUNG)

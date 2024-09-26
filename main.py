@@ -24,9 +24,9 @@ from os.path import abspath
 #TODO: try facebok-sdk (see link at top of Meta.py)
 #TODO: Get actual available categories from websites
 #TODO: Add a lot of comments for better readability :D
-#TODO: Add summary for double checking before starting uploading
-#TODO: Change significant comments to step() in all plugins
-#TODO: StuWe Dates not working
+#TODO: Add docstrings for better readability :D
+#TODO: Venyoo working custom category
+#TODO: Way to go back one step and change previous input
 
 def get_plugins() -> list:
     while True:
@@ -71,7 +71,7 @@ def print_current_plugins(plugins: list):
     print(format.info("Es werden folgende Plugins verwendet werden: \n"))
     for plugin in plugins:
         print(format.INFO + "  " + plugin.plugininfo.FRIENDLYNAME + format.CLEAR)
-    input("\n Zum Vortsetzen, drücke eine beliebige Taste.\n> ")
+    input("\n Zum Vortsetzen, drücke <Enter>.\n> ")
     
 def get_Z10_credetials(ls: list) -> tuple[str, str]:
     username = ""
@@ -79,8 +79,10 @@ def get_Z10_credetials(ls: list) -> tuple[str, str]:
     
     while username == "":
         username = input("\n# Wie lautet dein Z10-Benutzername (Kürzel)?: \n> ")
+        format.error("Bitte nenne dein Kürzel: ")
     while password == "":
         password = pwinput("\n# Wie lautet dein Z10-Passwort?: \n> ", "*")
+        format.error("Bitte nenne dein Passwort: ")
         
     return (username, password)    
 
@@ -125,14 +127,11 @@ def get_beginn() -> datetime:
             print(format.error("Deine Eingabe hat das falsche Format oder liegt in der Vergangenheit! Bitte gib Datum und Uhrzeit anhand des Beispiels an."))
     return veranstaltungsbeginn
 
-def get_ende(veranstaltungsbeginn) -> datetime:
+def get_ende(veranstaltungsbeginn: datetime) -> datetime:
     veranstaltungsende = None
     while (True):
         
-        string = input("\n# Wann endet die Veranstaltung? Lasse dieses Feld frei, wenn deine Veranstaltung keine bestimmte Endzeit hat. (Format: 01.02.2024 17:42): \n> ")
-                    
-        if string == "":
-            break
+        string = input("\n# Wann endet die Veranstaltung? (Format: 01.02.2024 17:42): \n> ")
         
         try:
             veranstaltungsende = datetime.strptime(string, "%d.%m.%Y %H:%M")
@@ -142,7 +141,7 @@ def get_ende(veranstaltungsbeginn) -> datetime:
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except:
-            print(format.error("Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest."))
+            print(format.error("Deine Eingabe \"" + string + "\" hat das falsche Format oder liegt vor dem Beginn der Veranstaltung (" + veranstaltungsbeginn.strftime("%d.%m.%Y %H:%M") + ")! Bitte gib Datum und Uhrzeit anhand des Beispiels an oder lasse dieses Feld frei, wenn du keine Endzeit angeben möchtest."))
     return veranstaltungsende
 
 def get_location() -> list[str, str, str, str]:
@@ -185,16 +184,14 @@ def get_location() -> list[str, str, str, str]:
 
 def notify_of_rounded_times(beginn: datetime, ende: datetime):
     if beginn.minute % 30 != 0:
-        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Anfangsuhrzeit wird auf " + round_nearest_30min(beginn).strftime("%H:%M"), end=" gerundet"))
-    elif ende is not None and ende.minute % 30 != 0:
-        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet"))
-    elif beginn.minute % 30 != 0 and ende is not None and ende.minute % 30 != 0:
-        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M"), end=" gerundet"))
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Anfangsuhrzeit wird auf " + round_nearest_30min(beginn).strftime("%H:%M") + " gerundet"))
+    elif ende.minute % 30 != 0:
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
+    elif beginn.minute % 30 != 0 and ende.minute % 30 != 0:
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
 
-    print("")
-    
-    time.sleep(1)
-    
+    if beginn.minute % 30 != 0 or ende.minute % 30 != 0:
+        input("\n Zum Vortsetzen, drücke <Enter>.\n> ")
     return
     
 def get_kategorien(plugins: list) -> list[str]:
@@ -211,12 +208,18 @@ def get_kategorien(plugins: list) -> list[str]:
         return []
     
     while True:
+        max_length = 0
+        for plugin in plugins:
+            # add line, if this plugin uses categories
+            if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
+                max_length = max(max_length, len(plugin.plugininfo.FRIENDLYNAME))
+                
         # dynamically generate question
         askstring = "\nSollen die Standardkategorien\n\n"            
         for plugin in plugins:
             # add line, if this plugin uses categories
             if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
-                askstring += "  " + plugin.plugininfo.FRIENDLYNAME + ": \"" + plugin.plugininfo.KATEGORIEN[plugin.plugininfo.DEFAULTCATEGORY_KEY] + "\",\n"
+                askstring += ("{:<%i}" %(max_length + 5)).format("  " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[plugin.plugininfo.DEFAULTCATEGORY_KEY] + "\",\n"
         askstring += "\nbeibehalten werden? [Y/n]\n> "
         
         # ask if default categories should be kept
@@ -278,6 +281,95 @@ def get_link() -> str:
         link = Veranstaltungsdetails.LINK
     return link
 
+def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: _Logindaten):
+    print(format.info("Hier kannst du die eingegebenen Daten überprüfen. Schaue noch einmal gut drüber, denn nach dem Veröffentlichen müssen Änderungen manuell auf jeder Platform einzeln angewendet werden: \n"))
+    
+    ## Plugins
+    format.overview_print("Platformen")
+    # Print first plugin inline with tile
+    print("- " + plugins[0].plugininfo.FRIENDLYNAME)
+    # Print rest of plugins
+    if len(plugins) > 1:
+        for plugin in plugins[1:]:
+            format.overview_print("")
+            print("- " + plugin.plugininfo.FRIENDLYNAME)
+            
+    format.overview_newline()
+    
+    # Z10 Credentials
+    if (username, password) != ("", ""):
+        format.overview_print("Z10 Benutzername")
+        print(credentials.Z10_USERNAME)
+    
+    format.overview_newline()
+    
+    # Name
+    format.overview_print("Titel")
+    print(details.NAME)
+    
+    format.overview_newline()
+    
+    # Unterüberschrift
+    format.overview_print("Unterüberschrift")
+    print(details.UNTERÜBERSCHRIFT)
+    
+    format.overview_newline()
+    
+    # Beschreibung
+    format.overview_print("Beschreibung")
+    print(details.BESCHREIBUNG)
+    
+    format.overview_newline()
+    
+    # Zeiten
+    format.overview_print("Startdatum und -zeit")
+    print(details.BEGINN.strftime("%d.%m.%Y %H:%M"))
+    format.overview_print("Enddatum und -zeit")
+    print(details.BEGINN.strftime("%d.%m.%Y %H:%M"))
+    
+    format.overview_newline()
+    
+    # Location
+    format.overview_print("Location / Venue")
+    print(details.LOCATION)
+    format.overview_print("Addresse")
+    print(details.STRASSE + ", " + details.PLZ + " " +details.STADT)
+    
+    format.overview_newline()
+    
+    # Kategorien
+    # Check if there are any plugins that use categories
+    
+    if kategorien != []:
+        format.overview_print("Kategorien")
+        
+        max_length = 0
+        for plugin in plugins:
+            # add line, if this plugin uses categories
+            if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
+                max_length = max(max_length, len(plugin.plugininfo.FRIENDLYNAME))
+                
+        first = True
+        for plugin in plugins:
+            if plugin.plugininfo.DEFAULTCATEGORY_KEY is not None:
+                if first:
+                    first = False
+                else:
+                    format.overview_print("")
+                print(("{:<%i}" %(max_length + 5)).format(" " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[plugin.plugininfo.DEFAULTCATEGORY_KEY])
+            
+        format.overview_newline()
+    
+    # Bild und Link
+    format.overview_print("Bild-Dateipfad")
+    print(format.quote(details.BILD_DATEIPFAD))
+    format.overview_print("Link")
+    print(format.quote(details.LINK))
+
+            
+    ## Confirm all
+    input("\n Zum Bestätigen, drücke <Enter>.\n> ")
+
 if __name__ == "__main__":
     
     # Get event details
@@ -286,13 +378,13 @@ if __name__ == "__main__":
         reset_screen(heading="Plugins")
         plugins = get_plugins()
         print_current_plugins(plugins)
-                
+             
         # Z10 user account
         if Z10Website in plugins:
             reset_screen(heading="Z10 Benutzerkonto")
             username, password = get_Z10_credetials(plugins)
         else:
-            username, password =  ("", "")
+            username, password = ("", "")
         
         # Title and description
         reset_screen(heading="Titel und Beschreibung")
@@ -304,9 +396,10 @@ if __name__ == "__main__":
         reset_screen(heading="Zeiten")
         beginn = get_beginn()
         ende = get_ende(beginn)
-        notify_of_rounded_times(beginn, ende)
+        if Nebenande in plugins:
+            notify_of_rounded_times(beginn, ende)
         
-        # Localtion
+        # Location
         reset_screen(heading="Veranstaltungsort")
         location, strasse, plz, stadt = get_location()
         
@@ -340,6 +433,10 @@ if __name__ == "__main__":
     credentials = _Logindaten(Z10_USERNAME = username,
                               Z10_PASSWORD = password)
     
+    # Print summary
+    reset_screen("Übersicht")
+    print_summary(plugins, details, credentials)
+        
     # init driver    
     options = Options()
     options.add_argument("--disable-infobars")
@@ -362,14 +459,14 @@ if __name__ == "__main__":
                 raise e
             except Exception as e:
                 print("\n\n" + e.with_traceback + "\n\n")
-                print("\n\n!!Achtung\u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n")
+                print(format.error("Achtung\u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
             lastsuccesful += 1
         driver.quit()
     except KeyboardInterrupt:
-        print("\n\n!!Achtung\u26A0 Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung bereits veröffentlicht sein kann oder nicht!\n")
+        print(format.error("Achtung Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
         driver.quit()
     except Exception as e:
-        print("\n\n!!Achtung\u26A0 Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n")
+        print(format.error("Achtung\u26A0 Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n"))
         driver.quit()
         raise e
     

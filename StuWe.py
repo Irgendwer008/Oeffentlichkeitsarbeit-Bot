@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -36,10 +37,12 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type="file"]'))).send_keys(details.BILD_DATEIPFAD)
     
     step("Veranstaltungsbeginn angeben")
-    driver.find_element(By.ID, "start_date").send_keys(datetime.strftime(details.BEGINN, "%d.%m.%Y"))
+    driver.find_element(By.ID, "start_date").click()
+    driver.find_element(By.ID, "start_date").send_keys(datetime.strftime(details.BEGINN, "%d%m%Y"))
 
     step("Veranstaltungsende angeben")
-    driver.find_element(By.ID, "end_date").send_keys(datetime.strftime(details.ENDE, "%d.%m.%Y"))
+    driver.find_element(By.ID, "end_date").click()
+    driver.find_element(By.ID, "end_date").send_keys(datetime.strftime(details.ENDE, "%d%m%Y"))
 
     step("Titel angeben")
     driver.find_element(By.ID, "title").send_keys(details.NAME)
@@ -71,9 +74,8 @@ def run(details: Veranstaltungsdetails, credentials: _Logindaten, plugins: list[
     step("Vorschau öffnen")
     driver.find_element(By.ID, "save").click()
 
-    step("Bild einfügen")
+    step("Einwilligung zur Datenverarbeitung akzeptieren")
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "agree2"))).click()
 
     step("Eintrag absenden")
-    driver.find_element(By.XPATH, "//button[contains(text(), 'Eintrag absenden')]").click()
-    
+    driver.find_element(By.XPATH, "//button[contains(text(), 'Eintrag absenden')]").click()    
