@@ -308,7 +308,7 @@ def get_link() -> str:
         link = Veranstaltungsdetails.LINK
     return link
 
-def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Logindaten):
+def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: "Logindaten"):
     print(format.info("Hier kannst du die eingegebenen Daten überprüfen. Schaue noch einmal gut drüber, denn nach dem Veröffentlichen müssen Änderungen manuell auf jeder Platform einzeln angewendet werden: \n"))
     
     ## Plugins
@@ -400,7 +400,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Lo
         if confirm == "":
             return
         if confirm.lower() == "abbrechen":
-            exit()
+            exit(1)
 
 if __name__ == "__main__":
     
@@ -445,7 +445,7 @@ if __name__ == "__main__":
         link = get_link()
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
-        exit()
+        exit(1)
         
     # Enter event details
     details = Veranstaltungsdetails(NAME = name, 

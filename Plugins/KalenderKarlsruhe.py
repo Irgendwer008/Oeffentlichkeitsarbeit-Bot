@@ -6,10 +6,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+
+# To allow importing from parent directory
+sys.path.append("../Oeffentlichkeitsarbeit-Bot")
+
+# Adaptive import of credentials.py
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from credentials import Logindaten
 
+# import helper functions
 from helper import Veranstaltungsdetails, PluginInfo, step 
 
 plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
@@ -24,7 +30,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
                          "6": "Stadtleben",
                          "14": "Sport"})
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 

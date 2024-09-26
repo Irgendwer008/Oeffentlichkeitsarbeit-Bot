@@ -5,15 +5,19 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from typing import TYPE_CHECKING
+import sys
 
-from helper import Veranstaltungsdetails, PluginInfo, round_nearest_30min, step
+# To allow importing from parent directory
+sys.path.append("../Oeffentlichkeitsarbeit-Bot")
+
+# Adaptive import of credentials.py
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from credentials import Logindaten
-try:
-    import Z10Website
-except:
-    pass
+
+# import helper functions
+from helper import Veranstaltungsdetails, PluginInfo, step
+from Plugins import Z10Website
 
 plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
                         DEFAULTCATEGORY_KEY=None, # Set to None (not "None" :D), if this platform doesn't use categories
@@ -21,7 +25,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
 
 
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
     
     driver.get("https://venyoo.de/home")
     

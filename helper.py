@@ -5,33 +5,6 @@ import sys
 import os
 import importlib.util
 
-## Be advised: The following parts for dynamic import of the credentials module where written by ChatGPT
-def get_Logindaten():
-    # Get paths
-    base_path = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
-    credentials_path = os.path.join(base_path, 'credentials.py')
-
-    # Dynamically load credentials.py if it exists
-    if os.path.exists(credentials_path):
-        spec = importlib.util.spec_from_file_location('credentials', credentials_path)
-        credentials = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(credentials)
-            
-        # Access the Logindaten class from credentials.py
-        if hasattr(credentials, 'Logindaten'):
-            # Now you can use the variables/functions from credentials.py
-            print(f"Loaded credentials")
-            return credentials.Logindaten  # Return reference to the Logindaten class
-        else:
-            raise ImportError("Logindaten class not found in credentials.py")
-    else:
-        print("credentials.py not found.")
-        exit()
-        
-Logindaten = get_Logindaten()
-## End of ChatGPT Code
-
-
 YES = ["Y", "y", "Yes", "yes", "Ja", "ja"]
 NO = ["N", "n", "No", "no", "Nein", "nein"]
 
@@ -134,3 +107,30 @@ class format:
         
     def quote(text: str) -> str:
         return "\"" + text + "\""
+
+
+## Be advised: The following parts for dynamic import of the credentials module where written by ChatGPT
+def get_Logindaten():
+    # Get paths
+    base_path = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+    credentials_path = os.path.join(base_path, 'credentials.py')
+
+    # Dynamically load credentials.py if it exists
+    if os.path.exists(credentials_path):
+        spec = importlib.util.spec_from_file_location('credentials', credentials_path)
+        credentials = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(credentials)
+            
+        # Access the Logindaten class from credentials.py
+        if hasattr(credentials, 'Logindaten'):
+            # Now you can use the variables/functions from credentials.py
+            print(f"Loaded credentials")
+            return credentials.Logindaten  # Return reference to the Logindaten class
+        else:
+            raise ImportError("Logindaten class not found in credentials.py")
+    else:
+        print(format.error("Fehler: credentials.py konnte nicht gefunden werden. Ist eine gültige credentials.py-Datei im selben Verzeichnis wie dieses Programm?\n"))
+        sys.exit(1)
+        
+Logindaten = get_Logindaten()
+## End of ChatGPT Code

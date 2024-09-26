@@ -9,17 +9,24 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from typing import TYPE_CHECKING
+import sys
 
-from helper import Veranstaltungsdetails, PluginInfo, step
+# To allow importing from parent directory
+sys.path.append("../Oeffentlichkeitsarbeit-Bot")
+
+# Adaptive import of credentials.py
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from credentials import Logindaten
+
+# import helper functions
+from helper import Veranstaltungsdetails, PluginInfo, step 
 
 plugininfo = PluginInfo(FRIENDLYNAME="Meta Business Suite",
                         DEFAULTCATEGORY_KEY=None, # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={})
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
     
     driver.get('https://business.facebook.com/latest/home')
     
