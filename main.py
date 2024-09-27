@@ -389,7 +389,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Lo
                     first = False
                 else:
                     format.overview_print("")
-                print(format.BOLD, ("{:<%i}" %(max_length + 5)).format(" " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]])
+                print(format.BOLD + ("{:<%i}" %(max_length + 5)).format(plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]])
             
         format.overview_newline()
     
@@ -402,7 +402,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Lo
             
     ## Confirm all
     while True:
-        confirm = input(f"\n {format.ORANGE}Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> ")
+        confirm = input(f"\n{format.ORANGE}Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> ")
         print(format.CLEAR, end="")
         if confirm == "":
             return
