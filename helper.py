@@ -80,6 +80,7 @@ class format:
     BOLD = "\033[1m"
     INFO = "\033[38;5;14m"
     WARNING = "\033[38;5;9m"
+    ORANGE = "\033[38;2;255;140;15m"
     INFO_ICON = "\U0001F6C8"
     WARNING_ICON = "\u26A0" 
     

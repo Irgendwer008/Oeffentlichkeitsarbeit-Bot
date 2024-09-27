@@ -9,10 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from sys import exit
 from os.path import abspath
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from credentials import Logindaten
+from credentials import Logindaten
 from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
     
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
@@ -214,7 +211,7 @@ def notify_of_rounded_times(beginn: datetime, ende: datetime):
     elif beginn.minute % 30 == 0 and ende.minute % 30 != 0:
         print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebene Enduhrzeit wird auf " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
     elif beginn.minute % 30 != 0 and ende.minute % 30 != 0:
-        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn, True).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
+        print(format.info("Hinweis: Nebenan.de akzeptiert nur Uhrzeiten zur halben und vollen Stunde. Die angegebenen Uhrzeiten werden auf " + round_nearest_30min(beginn).strftime("%H:%M") + " bzw. " + round_nearest_30min(ende, True).strftime("%H:%M") + " gerundet"))
 
     if beginn.minute % 30 != 0 or ende.minute % 30 != 0:
         input("\n Zum Vortsetzen, drücke <Enter>.\n> ")
@@ -269,13 +266,13 @@ def get_kategorien(plugins: list) -> list[str]:
                 else:
                     available_categories = list(plugin.plugininfo.KATEGORIEN.keys())
                     while True:
-                        print("\nWelche Kategorie soll für \"" + plugin.plugininfo.FRIENDLYNAME + "\" verwendet werden? Bitte gib die entsprechende Zahl (1-" + str(len(plugin.plugininfo.KATEGORIEN)) + ") an: ")
+                        print("\nWelche Kategorie soll für \"" + plugin.plugininfo.FRIENDLYNAME + "\" verwendet werden? Bitte gib die entsprechende Zahl (1-" + str(len(plugin.plugininfo.KATEGORIEN)) + ") an:\n")
                         for i in range(1, len(available_categories) + 1):
                             print(" {:<5} ".format(f"[{str(i)}]") + plugin.plugininfo.KATEGORIEN[available_categories[i-1]])
                         try:
                             # try assigning this key to the list
-                            ausgewählte_kategorien.append(available_categories[int(input("> "))-1])
-                            print("\n\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[ausgewählte_kategorien[-1]] + "\" verwenden.")
+                            ausgewählte_kategorien.append(available_categories[int(input("\n> "))-1])
+                            print("" + format.info("\"" + plugin.plugininfo.FRIENDLYNAME + "\" wird die Kategorie \"" + plugin.plugininfo.KATEGORIEN[ausgewählte_kategorien[-1]] + "\" verwenden."))
                             break
                         except KeyboardInterrupt as e:
                             raise e
@@ -310,7 +307,7 @@ def get_link() -> str:
         link = Veranstaltungsdetails.LINK
     return link
 
-def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: "Logindaten"):
+def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Logindaten):
     print(format.info("Hier kannst du die eingegebenen Daten überprüfen. Schaue noch einmal gut drüber, denn nach dem Veröffentlichen müssen Änderungen manuell auf jeder Platform einzeln angewendet werden: \n"))
     
     ## Plugins
@@ -330,7 +327,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: "L
         format.overview_print("Z10 Benutzername")
         print(credentials.Z10_USERNAME)
     
-    format.overview_newline()
+        format.overview_newline()
     
     # Name
     format.overview_print("Titel")
@@ -354,7 +351,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: "L
     format.overview_print("Startdatum und -zeit")
     print(details.BEGINN.strftime("%d.%m.%Y %H:%M"))
     format.overview_print("Enddatum und -zeit")
-    print(details.BEGINN.strftime("%d.%m.%Y %H:%M"))
+    print(details.ENDE.strftime("%d.%m.%Y %H:%M"))
     
     format.overview_newline()
     
@@ -385,7 +382,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: "L
                     first = False
                 else:
                     format.overview_print("")
-                print(("{:<%i}" %(max_length + 5)).format(" " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]])
+                print(format.BOLD, ("{:<%i}" %(max_length + 5)).format(" " + plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]])
             
         format.overview_newline()
     
@@ -398,7 +395,8 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: "L
             
     ## Confirm all
     while True:
-        confirm = input("\n Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> ")
+        confirm = input(f"\n {format.ORANGE}Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> ")
+        print(format.CLEAR, end="")
         if confirm == "":
             return
         if confirm.lower() == "abbrechen":

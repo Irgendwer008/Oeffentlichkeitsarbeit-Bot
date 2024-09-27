@@ -11,9 +11,7 @@ from selenium.webdriver.common.keys import Keys
 sys.path.append("../Oeffentlichkeitsarbeit-Bot")
 
 # Adaptive import of credentials.py
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from credentials import Logindaten
+from credentials import Logindaten
 
 # import helper functions
 from helper import Veranstaltungsdetails, PluginInfo, step 
