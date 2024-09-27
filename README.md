@@ -1,5 +1,5 @@
 # Oeffentlichkeitsarbeit-Bot
-Ein Script zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. auf Platformen aller Art
+Ein Programm zum automatischen Veröffentlichen der Veranstaltungen des Z10 e.V. auf Platformen aller Art
 
 ``` sh
 Benutzung: main.py [-h] [-w]
@@ -15,20 +15,19 @@ options:
 
 ## Requirements for running executable
 
-- Binary File
+- The corresponding Binary File
 
 - newest(-ish) version of Firefox installed
 
 - a correctly filled "credentials.py" (For reference see credentials_template.py) in the same directory
 
-- **Firefox** is used as browser and therefor also necessary and has to be installed.
+- **Firefox** is used as browser and therefore also necessary and has to be installed.
 
-- locale **"de_DE"** is installed ([Linux](https://ubuntuforums.org/showthread.php?t=196414)).
+- locale **"de_DE"** is installed ([Link for linux users](https://ubuntuforums.org/showthread.php?t=196414)).
 
-- **Nebenan.de** is set to **german locale** (I don't know if others are even possible, but still.)
+- Firefox does not autotranslate Websites
 
-
-### Requirements for running main.py
+## Requirements for running main.py
 
 all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install -r requirements.txt`
 
@@ -48,7 +47,11 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
 
-### Requirements for binary conversion from main.py to Oeffentlichkeitsarbeit-Bot.bin
+## Create Executable from Python
+
+Linux: `to_binary.sh`, Windows: `to_binary.bat`
+
+### Requirements:
 
 all pip-requirements are listed in requirements_for_binary_conversion.txt. To install all at once execute `pip3 install -r requirements.txt`
 
@@ -59,12 +62,6 @@ all pip-requirements are listed in requirements_for_binary_conversion.txt. To in
 - **Firefox** is used as browser and therefor also necessary and has to be installed.
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
-
-Windows only:
-
-- Git bash for exetution of to_binary.sh
-
-![image](https://github.com/user-attachments/assets/f9a88484-00e7-4081-8e01-19d91b38a08f)
 
 ### Allowed Image Files
 - *.png
@@ -77,9 +74,6 @@ Windows only:
 - StuWe
 - Z10 Website + Wiki
 - Venyoo
-
-### Currently mostly working plugins:
-None
 
 ### How to add new Plugins:
 example with "Name" as plugin name:
