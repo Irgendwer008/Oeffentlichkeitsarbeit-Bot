@@ -14,7 +14,10 @@ sys.path.append("../Oeffentlichkeitsarbeit-Bot")
 # Adaptive import of credentials.py
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    # Import Logindaten only for type hinting (not at runtime)
     from credentials import Logindaten
+else:
+    from helper import Logindaten
 
 # import helper functions
 from helper import Veranstaltungsdetails, PluginInfo, step, round_nearest_30min
@@ -38,7 +41,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
                          "14": "Ausflüge",
                          "15": "Sonstiges"})
 
-def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     step("Open Website")
     driver.get("https://gewerbe.nebenan.de/businesses/190915/feed")

@@ -13,7 +13,10 @@ sys.path.append("../Oeffentlichkeitsarbeit-Bot")
 # Adaptive import of credentials.py
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    # Import Logindaten only for type hinting (not at runtime)
     from credentials import Logindaten
+else:
+    from helper import Logindaten
 
 # import helper functions
 from helper import Veranstaltungsdetails, PluginInfo, step
@@ -25,7 +28,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
 
 
 
-def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get("https://venyoo.de/home")
     

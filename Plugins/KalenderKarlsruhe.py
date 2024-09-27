@@ -11,7 +11,12 @@ from selenium.webdriver.common.keys import Keys
 sys.path.append("../Oeffentlichkeitsarbeit-Bot")
 
 # Adaptive import of credentials.py
-from credentials import Logindaten
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    # Import Logindaten only for type hinting (not at runtime)
+    from credentials import Logindaten
+else:
+    from helper import Logindaten
 
 # import helper functions
 from helper import Veranstaltungsdetails, PluginInfo, step 
@@ -28,7 +33,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
                          "6": "Stadtleben",
                          "14": "Sport"})
 
-def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 

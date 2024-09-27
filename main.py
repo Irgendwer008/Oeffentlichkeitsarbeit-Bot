@@ -9,9 +9,33 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from sys import exit
 from os.path import abspath
-from credentials import Logindaten
+
+# Allow command line argument handling before anything else
+parser = argparse.ArgumentParser(
+    description = "Automatisiertes Veröffentlichen von Events auf einer Reihe von Platformen",
+    epilog = "Mehr auf Github: https://github.com/Irgendwer008/Oeffentlichkeitsarbeit-Bot")
+
+parser.add_argument(
+    "-w", 
+    "--not-headless", 
+    dest="headless", 
+    default=True, 
+    action="store_false", 
+    help="Ist diese Flagge gesetzt öffnet sich Firefox als Fenster. Wenn nicht, läuft es nur im Hintergrund")
+
+parser.set_defaults(flag=True)
+args = parser.parse_args()
+
+# Auxiliary imports
 from helper import Veranstaltungsdetails, format, reset_screen, round_nearest_30min, YES, NO
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    # Import Logindaten only for type hinting (not at runtime)
+    from credentials import Logindaten
+else:
+    from helper import Logindaten
     
+# Plugin imports
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
 import Plugins.Nebenande as Nebenande
 import Plugins.StuWe as StuWe
@@ -28,26 +52,9 @@ available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
 #TODO: Add docstrings for better readability :D
 #TODO: Venyoo working custom category
 #TODO: Way to go back one step and change previous input
-#TODO: Wrap Beschreibung in Overview
+#TODO: Wrap Zeilen von langem Text in Beschreibung in Overview
 #TODO: add credentials import from seperate file
-
-
-
-# Allow command line argument handling
-parser = argparse.ArgumentParser(
-    description = "Automatisiertes Veröffentlichen von Events auf einer Reihe von Platformen",
-    epilog = "Mehr auf Github: https://github.com/Irgendwer008/Oeffentlichkeitsarbeit-Bot")
-
-parser.add_argument(
-    "-w", 
-    "--not-headless", 
-    dest="headless", 
-    default=True, 
-    action="store_false", 
-    help="Ist diese Flagge gesetzt öffnet sich Firefox als Fenster. Wenn nicht, läuft es nur im Hintergrund")
-
-parser.set_defaults(flag=True)
-args = parser.parse_args()
+#TODO: add argument implementation for credentials and image file
 
 
 
@@ -487,7 +494,7 @@ if __name__ == "__main__":
         for plugin in plugins:
             try:
                 plugin.run(details, credentials, plugins, driver)
-                print("Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht.")
+                print(format.GREEN +  "Veranstaltung erfolgreich auf " + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + " veröffentlicht." + format.CLEAR)
             except KeyboardInterrupt as e:
                 raise e
             except Exception as e:

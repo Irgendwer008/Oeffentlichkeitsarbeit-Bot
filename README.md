@@ -18,6 +18,8 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 - Up to date **Python 3**
 
+- All needed file in the same structure as in this repo and a correctly filled "credentials.py" (For reference see credentials_template.py)
+
 - **Selenium** is needed as it does all the web automation: `pip3 install selenium`
 
 - **pwinput** is needed for the secret password prompt: `pip3 install pwinput`
@@ -33,6 +35,8 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 # Folgendes ist noch in der Entwicklung und funktioniert wahrscheinlich nicht, solange dieser Text noch hier steht :D
 
 ### Requirements for running Oeffentlichkeitsarbeit-Bot.bin
+
+- a correctly filled "credentials.py" (For reference see credentials_template.py) in the same directory
 
 - **Firefox** is used as browser and therefor also necessary and has to be installed.
 

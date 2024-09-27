@@ -17,7 +17,10 @@ sys.path.append("../Oeffentlichkeitsarbeit-Bot")
 # Adaptive import of credentials.py
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    # Import Logindaten only for type hinting (not at runtime)
     from credentials import Logindaten
+else:
+    from helper import Logindaten
 
 # import helper functions
 from helper import Veranstaltungsdetails, PluginInfo, step 
@@ -26,7 +29,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Meta Business Suite",
                         DEFAULTCATEGORY_KEY=None, # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={})
 
-def run(details: Veranstaltungsdetails, credentials: "Logindaten", plugins: list[str], driver: Firefox):
+def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get('https://business.facebook.com/latest/home')
     
