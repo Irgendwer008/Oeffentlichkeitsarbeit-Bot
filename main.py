@@ -2,13 +2,14 @@
 
 import argparse
 from datetime import datetime
-from os.path import exists
-from os.path import abspath
+from os.path import exists, abspath
+from os import system
 from pwinput import pwinput
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from sys import exit
-from os.path import abspath
+
+system("")
 
 # Allow command line argument handling before anything else
 parser = argparse.ArgumentParser(
