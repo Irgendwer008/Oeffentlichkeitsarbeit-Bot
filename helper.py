@@ -4,6 +4,7 @@ from inspect import stack, getmodule
 import sys
 import os
 import importlib.util
+import time
 
 YES = ["Y", "y", "Yes", "yes", "Ja", "ja"]
 NO = ["N", "n", "No", "no", "Nein", "nein"]
@@ -133,7 +134,8 @@ def get_Logindaten():
         else:
             raise ImportError("Logindaten class not found in credentials.py")
     else:
-        print(format.error("Fehler: credentials.py konnte nicht gefunden werden. Ist eine gültige credentials.py-Datei im selben Verzeichnis wie dieses Programm?\n"))
+        print(format.error("Fehler: credentials.py konnte nicht gefunden werden. Ist eine gültige credentials.py-Datei im selben Verzeichnis wie dieses Programm?"))
+        input("\n> ")
         sys.exit(1)
         
 Logindaten = get_Logindaten()

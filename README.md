@@ -12,6 +12,22 @@ options:
                       Fenster. Wenn nicht, läuft es nur im Hintergrund
 ```
 
+
+## Requirements for running executable
+
+- Binary File
+
+- newest(-ish) version of Firefox installed
+
+- a correctly filled "credentials.py" (For reference see credentials_template.py) in the same directory
+
+- **Firefox** is used as browser and therefor also necessary and has to be installed.
+
+- locale **"de_DE"** is installed ([Linux](https://ubuntuforums.org/showthread.php?t=196414)).
+
+- **Nebenan.de** is set to **german locale** (I don't know if others are even possible, but still.)
+
+
 ### Requirements for running main.py
 
 all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install -r requirements.txt`
@@ -32,18 +48,6 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
 
-### Requirements for running Oeffentlichkeitsarbeit-Bot.bin
-
-- newest(-ish) version of Firefox installed
-
-- a correctly filled "credentials.py" (For reference see credentials_template.py) in the same directory
-
-- **Firefox** is used as browser and therefor also necessary and has to be installed.
-
-- locale **"de_DE"** is [installed](https://ubuntuforums.org/showthread.php?t=196414)
-
-- **Nebenan.de** is set to **german locale** (I don't know if others are even possible, but still.)
-
 ### Requirements for binary conversion from main.py to Oeffentlichkeitsarbeit-Bot.bin
 
 all pip-requirements are listed in requirements_for_binary_conversion.txt. To install all at once execute `pip3 install -r requirements.txt`
@@ -55,6 +59,12 @@ all pip-requirements are listed in requirements_for_binary_conversion.txt. To in
 - **Firefox** is used as browser and therefor also necessary and has to be installed.
 
 - Probably a linux distribution (tested only on Fedora 40). Maybe Windows, but i haven't tested yet. You are welcome to do so and report your findings!
+
+Windows only:
+
+- Git bash for exetution of to_binary.sh
+
+![image](https://github.com/user-attachments/assets/f9a88484-00e7-4081-8e01-19d91b38a08f)
 
 ### Allowed Image Files
 - *.png

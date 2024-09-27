@@ -56,7 +56,7 @@ available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
 #TODO: Wrap Zeilen von langem Text in Beschreibung in Overview
 #TODO: add credentials import from seperate file
 #TODO: add argument implementation for credentials and image file
-
+#TODO: Update website locales in README.md
 
 
 def get_plugins() -> list:
