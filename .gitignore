@@ -3,5 +3,5 @@ build/
 
 credentials.py
 image.jpg
-Oeffentlichkeitsarbeit-Bot.bin.spec
+*.spec
 Oeffentlichkeitsarbeit-Bot.bin

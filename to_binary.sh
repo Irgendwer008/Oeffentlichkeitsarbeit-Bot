@@ -1,1 +1,1 @@
-pyinstaller --onefile --distpath ./ --clean --exclude-module credentials --add-data "credentials.py:." --name Oeffentlichkeitsarbeit-Bot.bin main.py 
+pyinstaller --onefile --distpath ./ --clean --exclude-module credentials --add-data "credentials.py:." --name Oeffentlichkeitsarbeit-Bot-$OSTYPE main.py 
