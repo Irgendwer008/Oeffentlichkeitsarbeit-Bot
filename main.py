@@ -402,8 +402,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Lo
             
     ## Confirm all
     while True:
-        confirm = input(f"\n{format.ORANGE}Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> ")
-        print(format.CLEAR, end="")
+        confirm = input(f"\n{format.ORANGE}Zum Bestätigen, drücke <Enter>. Tippe \"Abbrechen\", um den Vorgang abzubrechen\n> " + format.CLEAR)
         if confirm == "":
             return
         if confirm.lower() == "abbrechen":
@@ -498,7 +497,7 @@ if __name__ == "__main__":
             except KeyboardInterrupt as e:
                 raise e
             except Exception as e:
-                print("\n\n" + e.with_traceback + "\n\n")
+                print("\n\n" + str(e.with_traceback) + "\n\n")
                 print(format.error("Achtung\u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
             lastsuccesful += 1
         driver.quit()
