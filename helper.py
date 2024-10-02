@@ -46,7 +46,7 @@ def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
     return result
 
 def step(text: str):
-    print(format.ORANGE + getmodule(stack()[1][0]).plugininfo.FRIENDLYNAME + ": " + text + "                                                             " + format.CLEAR, end="\r")
+    print(format.ORANGE + getmodule(stack()[1][0]).plugininfo.FRIENDLYNAME + ": " + text + "                                                             " + format.CLEAR, end="\n\n")
 
 def reset_screen(heading: str = None):
     print(chr(27) + "[H" + chr(27) + "[J", end="")
@@ -95,7 +95,7 @@ class format:
         return format.INFO + "\n" + format.INFO_ICON + " " + text + format.CLEAR
 
     def error(text: str) -> str:
-        reset_screen()
+        #reset_screen()
         return format.WARNING + "\n" + format.WARNING_ICON + " " + text + format.CLEAR
     
     def overview_print(text: str):

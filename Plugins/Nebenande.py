@@ -43,24 +43,20 @@ plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
 
 def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
-    step("Open Website")
+    step("Website öffnen")
     driver.get("https://gewerbe.nebenan.de/businesses/190915/feed")
     
     
-    step("Declining cookies")
+    step("Cookies ablehnen")
     WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, '[title="SP Consent message"]')))
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".message-component.message-button.no-children.focusable.sp_choice_type_13"))).click()
     driver.switch_to.default_content()
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, "email")))
+    
 
 
-    step("Einloggen")    
-    email_field = driver.find_element(By.NAME, "email")
-    email_field.send_keys(credentials.NEBENANDE_EMAIL)
-
-    password_field = driver.find_element(By.NAME, "password")
-    password_field.send_keys(credentials.NEBENANDE_PASSWORD)
-
+    step("Einloggen")
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, "email"))).send_keys(credentials.NEBENANDE_EMAIL)
+    driver.find_element(By.NAME, "password").send_keys(credentials.NEBENANDE_PASSWORD)
     driver.find_element(By.CLASS_NAME, "ui-button-primary").click()   
     
      
@@ -68,12 +64,15 @@ def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[s
     time.sleep(1)
 
 
-    step("Formular öffnen")
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article"))).click()
+    step("Formular öffnen")    
+    driver.get("https://gewerbe.nebenan.de/businesses/190915/feed") # otherwise doesn't wait long enough
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article")))
+        
+    driver.find_element(By.XPATH, "//strong[contains(text(), 'Veranstaltung')]/ancestor::article/ancestor::li/article").click()
     
     step("Titel und Veranstaltungsort")
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
-        driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Name der Veranstaltung"]'))).send_keys(details.NAME)
+        driver.find_element(By.NAME, "subject"))).send_keys(details.NAME)
     driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Ort der Veranstaltung"]').send_keys(details.STRASSE)
     
     step("Beginn: Tag")
@@ -126,4 +125,5 @@ def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[s
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
             
     step("Speichern")
-    driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
+    #driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
+    time.sleep(600)

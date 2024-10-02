@@ -390,7 +390,7 @@ def print_summary(plugins: list, details: Veranstaltungsdetails, credentials: Lo
                     first = False
                 else:
                     format.overview_print("")
-                print(format.BOLD + ("{:<%i}" %(max_length + 5)).format(plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]])
+                print(format.BOLD + ("{:<%i}" %(max_length + 5)).format(plugin.plugininfo.FRIENDLYNAME + ":") + " \"" + plugin.plugininfo.KATEGORIEN[details.AUSGEWÄHLTE_KATEGORIE[plugins.index(plugin)]] + "\"")
             
         format.overview_newline()
     
@@ -499,14 +499,15 @@ if __name__ == "__main__":
                 raise e
             except Exception as e:
                 print("\n\n" + str(e.with_traceback) + "\n\n")
-                print(format.error("Achtung\u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
+                print(format.error("Achtung \u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
             lastsuccesful += 1
         driver.quit()
     except KeyboardInterrupt:
-        print(format.error("Achtung Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
+        print(format.error("Achtung \u26A0 Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
         driver.quit()
     except Exception as e:
-        print(format.error("Achtung\u26A0 Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n"))
+        print(e)
+        print(format.error("Achtung \u26A0 Das Programm wurde aufgrund eines Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die einzelnen Platformen manuell, besonders \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\", da die Veranstaltung veröffentlicht sein kann oder auch nicht!\n"))
         driver.quit()
         raise e
     

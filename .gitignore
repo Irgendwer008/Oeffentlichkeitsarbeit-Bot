@@ -5,3 +5,5 @@ build/
 image.jpg
 *.spec
 Oeffentlichkeitsarbeit-Bot.bin
+*.jpg
+*.png
