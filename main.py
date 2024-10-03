@@ -295,7 +295,8 @@ def get_kategorien(plugins: list) -> list[str]:
                 if plugins[i].plugininfo.DEFAULTCATEGORY_KEY != ausgewählte_kategorien[i]:
                     those_are_the_default_values_tho = False
             if those_are_the_default_values_tho:
-                print("\nAber... das... das sind doch schon die Standardwerte? Wie auch immer, weiter gehts:\n")
+                print("\nAber... das... das sind doch schon die Standardwerte? Wie auch immer, weiter gehts (<Enter>):\n")
+                input("> ")
                 
             break
         
