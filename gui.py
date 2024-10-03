@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timedelta
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
@@ -40,7 +42,12 @@ class NewEventItem(MenuItem):
             self.plugins_list.append((plugin, ttk.BooleanVar(value=True)))
             
         self.title = ttk.StringVar()
-        self.subtitle = ttk.StringVar(value=Veranstaltungsdetails.UNTERÜBERSCHRIFT)
+        self.subtitle = ttk.StringVar()
+        self.description = ttk.StringVar()
+        self.start_hours = ttk.IntVar()
+        self.start_minutes = ttk.IntVar()
+        self.end_hours = ttk.IntVar()
+        self.end_minutes = ttk.IntVar()
         
         
         # Scrollframe that contains all the elements
@@ -54,23 +61,76 @@ class NewEventItem(MenuItem):
         plugins_lbl = ttk.Label(scrollFrame, text="Plugins")
         plugins_lbl.grid(row=0, column=0, padx=5, pady=5, sticky=NW)
         plugins_frame = ttk.Frame(scrollFrame)
-        plugins_frame.grid(row=0, column=1, padx=5, pady=5)
+        plugins_frame.grid(row=0, column=1, padx=5, pady=5, sticky=W)
         
         for tuple in self.plugins_list:
             ttk.Checkbutton(plugins_frame, onvalue=True, offvalue=False, text=tuple[0].plugininfo.FRIENDLYNAME, variable=tuple[1])\
-                .pack(padx=(30, 5), pady=(5, 0), anchor=W)
+                .pack(padx=5, pady=(5, 0), anchor=W)
         
         # Title
         title_lbl = ttk.Label(scrollFrame, text="Titel")
-        title_lbl.grid(row=1, column=0, padx=5, pady=5, sticky=NW)
+        title_lbl.grid(row=1, column=0, padx=5, pady=5, sticky=W)
         title_en = ttk.Entry(scrollFrame, textvariable=self.title)
-        title_en.grid(row=1, column=1, padx=5, pady=5)
+        title_en.grid(row=1, column=1, padx=5, pady=5, sticky=EW)
         
         # Subtitle
-        title_lbl = ttk.Label(scrollFrame, text="Untertitel")
-        title_lbl.grid(row=2, column=0, padx=5, pady=5, sticky=NW)
+        title_lbl = ttk.Label(scrollFrame, text="Unterüberschrift")
+        title_lbl.grid(row=2, column=0, padx=5, pady=5, sticky=W)
         title_en = ttk.Entry(scrollFrame, textvariable=self.title)
-        title_en.grid(row=2, column=1, padx=5, pady=5)
+        title_en.grid(row=2, column=1, padx=5, pady=5, sticky=EW)
+        self.subtitle.set(Veranstaltungsdetails.UNTERÜBERSCHRIFT)
+        
+        # Description
+        description_lbl = ttk.Label(scrollFrame, text="Beschreibung")
+        description_lbl.grid(row=3, column=0, padx=5, pady=10, sticky=NW)
+        description_txt = ttk.Text(scrollFrame, height=10)
+        description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
+        
+        # Start
+        title_lbl = ttk.Label(scrollFrame, text="Veranstaltungsbeginn")
+        title_lbl.grid(row=4, column=0, padx=5, pady=5, sticky=W)
+        start_frame = ttk.Frame(scrollFrame)
+        start_frame.grid(row=4, column=1, sticky=W)
+        
+        ## Date
+        date_entry = ttk.DateEntry(start_frame, firstweekday=0, dateformat="%d.%m.%Y")
+        date_entry.pack(padx=5, pady=5, side=LEFT)
+
+        ## Hours
+        hours_spinbox = ttk.Spinbox(start_frame, from_=0, to=23, textvariable=self.start_hours, wrap=True, width=5)
+        hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        self.start_hours.set((datetime.now() + timedelta(hours=1)).hour)
+        
+        ttk.Label(start_frame, text=":").pack(padx=5, pady=5, side=LEFT)
+
+        ## Minutes
+        minutes_spinbox = ttk.Spinbox(start_frame, from_=0, to=59, textvariable=self.start_minutes, wrap=True, width=5)
+        minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        
+        ttk.Label(start_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
+        
+        # End
+        title_lbl = ttk.Label(scrollFrame, text="Veranstaltungsende")
+        title_lbl.grid(row=5, column=0, padx=5, pady=5, sticky=W)
+        end_frame = ttk.Frame(scrollFrame)
+        end_frame.grid(row=5, column=1, sticky=W)
+        
+        ## Date
+        date_entry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y")
+        date_entry.pack(padx=5, pady=5, side=LEFT)
+
+        ## Hours
+        hours_spinbox = ttk.Spinbox(end_frame, from_=0, to=23, textvariable=self.end_hours, wrap=True, width=5)
+        hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        self.end_hours.set((datetime.now() + timedelta(hours=3)).hour)
+        
+        ttk.Label(end_frame, text=":").pack(padx=5, pady=5, side=LEFT)
+
+        ## Minutes
+        minutes_spinbox = ttk.Spinbox(end_frame, from_=0, to=59, textvariable=self.end_minutes, wrap=True, width=5)
+        minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        
+        ttk.Label(end_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
         
 
 # Main Window
@@ -93,5 +153,7 @@ buttonFrame = ttk.Frame(mainMenuFrame)
 buttonFrame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 newEventItem = NewEventItem("Event erstellen", tabs, buttonFrame, available_plugins)
+
+tabs.select(newEventItem.frame)
 
 root.mainloop()
