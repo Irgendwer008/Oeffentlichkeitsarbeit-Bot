@@ -87,5 +87,4 @@ This acts as a help for people new to this context, but also as a link-collectio
 - [CSS Selectors](https://www.w3schools.com/cssref/css_selectors.php)
 - [Nice overview over selenium and many of it's features](https://pythonexamples.org/python-selenium-introduction/)
 - [datetime format codes](https://www.geeksforgeeks.org/python-datetime-strptime-function/)
-- [Terminal Formating (colors etc.)](https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences)
-- [Unicode box drawing](https://en.wikipedia.org/wiki/Box-drawing_characters)
+- [ttkbootstrap handbook](https://ttkbootstrap.readthedocs.io/en/version-0.5/handbook.html) and [style guide](https://ttkbootstrap.readthedocs.io/en/latest/styleguide/)
