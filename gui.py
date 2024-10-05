@@ -236,10 +236,13 @@ class NewEventItem(MenuItem):
         title_en.grid(row=10, column=1, padx=5, pady=5, sticky=EW)
         self.link.set(Veranstaltungsdetails.LINK)
             
+def quit_program(_):
+    root.destroy()
             
 
 # Main Window
 root = ttk.Window(title="Z10 Autopublisher", themename="darkly")
+root.bind_all("<Control-q>", quit_program)
 # Start maximized
 w, h = root.winfo_screenwidth(), root.winfo_screenheight()
 root.geometry("%dx%d+0+0" % (w, h))
