@@ -31,7 +31,7 @@ options:
 
 all pip-requirements are listed in requirements.txt. To install all at once execute `pip3 install -r requirements.txt`
 
-- Up to date **Python 3**
+- **Python Version 3.7 or above**. Check with `python3 --version`
 
 - All needed file in the same structure as in this repo and a correctly filled "credentials.py" (For reference see credentials_template.py)
 
@@ -49,13 +49,13 @@ all pip-requirements are listed in requirements.txt. To install all at once exec
 
 ## Create Executable from Python
 
-Linux: `to_binary.sh`, Windows: `to_binary.bat`
+execute one of the following scripts: linux: `to_binary.sh`, Windows: `to_binary.bat`
 
 ### Requirements:
 
-all pip-requirements are listed in requirements_for_binary_conversion.txt. To install all at once execute `pip3 install -r requirements.txt`
+- **Python Version 3.7 or above**. Check with `python3 --version`
 
-- Up to date **Python 3** (I assume)
+all pip-requirements are listed in requirements_for_binary_conversion.txt. To install all at once execute `pip3 install -r requirements_for_binary_conversion.txt`
 
 - **Pyinstaller** is needed for the conversion: `pip3 install pyinstaller`
 
