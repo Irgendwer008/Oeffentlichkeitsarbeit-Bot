@@ -94,7 +94,7 @@ def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[s
     Select(driver.find_element(By.NAME, "starttime_0")).select_by_visible_text(round_nearest_30min(details.BEGINN).strftime("%H:%M"))
     
     step("Ende")
-    driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/article[2]/ul/li/span").click()
+    driver.find_element(By.XPATH, "//span[text()='Ende der Veranstaltung angeben']").click()
     driver.find_elements(By.TAG_NAME, "input")[3].click()
     
     step("Ende: Tag")
@@ -115,15 +115,14 @@ def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[s
     step("Beschreibung")
     driver.find_element(By.CSS_SELECTOR, "textarea[placeholder=\"Deine Veranstaltungsbeschreibung\"]").send_keys(details.BESCHREIBUNG)
     
-    step("Bild")
+    step("Bild hochladen")
     driver.find_element(By.CLASS_NAME, "c-file_picker-input").send_keys(details.BILD_DATEIPFAD)
-    time.sleep(1)
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/footer/span[1]"))).click()
+    time.sleep(3)
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "//footer/span[text()='Bestätigen']"))).click()
         
     step("Kategorie")
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/main/div/div/div/div[1]/div/article/div/div/article/section/form/div[5]/div/div/div"))).click()
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "/html/body/div/div/div/article/div/article/ul/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.CLASS_NAME, "c-feed_category_picker"))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(driver.find_element(By.XPATH, "//ul[@class='c-fancy_select-list']/li[" + str(int(details.AUSGEWÄHLTE_KATEGORIE[plugins.index(sys.modules[__name__])]) + 1) + "]"))).click()
             
     step("Speichern")
-    #driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
-    time.sleep(600)
+    driver.find_element(By.CSS_SELECTOR, '[type="submit"]').click()
