@@ -111,6 +111,16 @@ class NewEventItem(MenuItem):
         self.image_path = ttk.StringVar()
         self.link = ttk.StringVar()
         
+        def validate_min_max(input, widget, min, max):
+            print("test")
+            if len(input) >= min and len(input <= max):
+                widget.configure(bootstyle = SUCCESS)
+                return True
+            else:
+                widget.configure(bootstyle = WARNING)
+                return False
+                
+            
         
         # Scrollframe that contains all the elements
         scrollFrame = ScrolledFrame(self.frame, autohide=True)
@@ -135,6 +145,7 @@ class NewEventItem(MenuItem):
         title_lbl = ttk.Label(scrollFrame, text="Titel")
         title_lbl.grid(row=1, column=0, padx=5, pady=5, sticky=W)
         title_en = ttk.Entry(scrollFrame, textvariable=self.title)
+        title_en.config(validate="focusout", validatecommand=(validate_min_max, "%P", title_en, 2, 5000))
         title_en.grid(row=1, column=1, padx=5, pady=5, sticky=EW)
         
         # Subtitle
