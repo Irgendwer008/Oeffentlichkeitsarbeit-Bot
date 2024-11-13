@@ -2,9 +2,8 @@ __pycache__/
 build/
 
 *credentials*
-image.jpg
 *.spec
-Oeffentlichkeitsarbeit-Bot.bin
 *.jpg
 *.png
+*.webp
 test.py
