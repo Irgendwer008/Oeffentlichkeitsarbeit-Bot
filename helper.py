@@ -45,8 +45,11 @@ def round_nearest_30min(dtobj: datetime, earlier: bool = False) -> datetime:
     result += timedelta(minutes=dtobj.minute - dtobj.minute % 30)
     return result
 
-def step(text: str):
-    print(format.ORANGE + getmodule(stack()[1][0]).plugininfo.FRIENDLYNAME + ": " + text + "                                                             " + format.CLEAR, end="\n\n")
+def step(text: str, friendlyname = None):
+    if friendlyname is None:
+        print(format.ORANGE + getmodule(stack()[1][0]).plugininfo.FRIENDLYNAME + ": " + text + "                                                             " + format.CLEAR, end="\n\n")
+    else:
+        print(format.ORANGE + friendlyname + ": " + text + "                                                             " + format.CLEAR, end="\n\n")
 
 def reset_screen(heading: str = None):
     print(chr(27) + "[H" + chr(27) + "[J", end="")

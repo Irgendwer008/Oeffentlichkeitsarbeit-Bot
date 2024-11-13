@@ -2,8 +2,9 @@
 
 import argparse
 from datetime import datetime
-from os.path import exists, abspath
-from os import system
+from os.path import exists, abspath, splitext
+from os import system, remove
+from PIL import Image
 from pwinput import pwinput
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -44,19 +45,23 @@ import Plugins.Z10Website as Z10Website
 import Plugins.Venyoo as Venyoo
 available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
 
+image_to_delete = ""
+
 
 
 #TODO: Check if events where published correctly (prob takes much time :,) )
-#TODO: try facebok-sdk (see link at top of Meta.py)
+#TODO: Try facebok-sdk (see link at top of Meta.py)
 #TODO: Get actual available categories from websites
 #TODO: Add a lot of comments for better readability :D
 #TODO: Add docstrings for better readability :D
 #TODO: Venyoo working custom category
 #TODO: Way to go back one step and change previous input
 #TODO: Wrap Zeilen von langem Text in Beschreibung in Overview
-#TODO: add credentials import from seperate file
-#TODO: add argument implementation for credentials and image file
+#TODO: Add credentials import from seperate file
+#TODO: Add argument implementation for credentials and image file
 #TODO: Update website locales in README.md
+#TODO: Make main its own class
+#TODO: Import events from z10.info 
 
 
 def get_plugins() -> list:
@@ -303,11 +308,23 @@ def get_kategorien(plugins: list) -> list[str]:
     return ausgewählte_kategorien
 
 def get_bild() -> str:
+    image_to_delete = ""
+    
     filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
+    
+    if filepath.endswith(".webp"):
+        webp_image = Image.open(filepath)
+        png_image = webp_image.convert("RGBA")
+        
+        result_filepath = splitext(filepath)[0] + ".png"
+        
+        png_image.save(result_filepath)
+        filepath = result_filepath
+        image_to_delete = result_filepath
         
     while not exists(filepath) or not (filepath.endswith(".png") or filepath.endswith(".jpg") or filepath.endswith(".gif")):
         filepath = input(format.error("Bitte nenne einen existierenden dateipfad: "))
-    return abspath(filepath)
+    return abspath(filepath), image_to_delete
 
 def get_link() -> str:
     link = input("\n# Wie lautet der Link ? (Optional, Standard ist '" + Veranstaltungsdetails.LINK + "'): \n> ")
@@ -448,7 +465,7 @@ if __name__ == "__main__":
         
         # Image and link path / uri
         reset_screen(heading="Bild und Link")
-        bild = abspath(get_bild())
+        bild, image_to_delete = get_bild()
         link = get_link()
     except KeyboardInterrupt:
         print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
@@ -501,7 +518,12 @@ if __name__ == "__main__":
                 print("\n\n" + str(e.with_traceback) + "\n\n")
                 print(format.error("Achtung \u26A0 Es gab einen Fehlers während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
             lastsuccesful += 1
+        input("\n# Beende das Programm mit <Enter>: \n> ")
         driver.quit()
+        try:
+            remove(image_to_delete)
+        except:
+            pass
     except KeyboardInterrupt:
         print(format.error("Achtung \u26A0 Das Programm wurde vom Benutzer während des Hochladens auf \"" + plugins[lastsuccesful].plugininfo.FRIENDLYNAME + "\" unterbrochen! Bitte überprüfe die Platformen manuell, da die Veranstaltung hier höchstwahrscheinlich nicht veröffentlicht werden konnte!\n"))
         driver.quit()

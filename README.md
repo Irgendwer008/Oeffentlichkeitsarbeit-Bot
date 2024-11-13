@@ -68,6 +68,9 @@ all pip-requirements are listed in requirements_for_binary_conversion.txt. To in
 - *.jpg
 - *.gif
 
+will be converted to a new *.png before uploading which is deleted again afterwards:
+- *.webp
+
 ### Currently fully working plugins:
 - Kalender Karlsruhe
 - Nebenan.de
