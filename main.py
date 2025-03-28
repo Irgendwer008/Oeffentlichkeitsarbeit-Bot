@@ -2,6 +2,8 @@
 
 import argparse
 from datetime import datetime
+import tkinter as tk
+from tkinter import filedialog
 from os.path import exists, abspath, splitext
 from os import system, remove
 from PIL import Image
@@ -322,8 +324,22 @@ class Main():
         
         return ausgewählte_kategorien
 
-    def get_bild(self) -> str:        
-        filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
+    def get_bild(self) -> str:
+        
+        #filepath = input("\n# Wie lautet der Dateipfad zum Bild der Veranstaltung?: \n> ")
+        
+        # Use Tkinter File Dialog
+        root = tk.Tk()
+        root.withdraw()
+        
+        filepath = filedialog.askopenfilename(filetypes=[
+                                        ("PNG", "*.png"),
+                                        ("JPEG", "*.jpg"),
+                                        ("GIF", "*.gif"),
+                                        ("WEBP", "*.webp"),
+                                        ("All files", "*")], defaultextension="png")
+        
+        root.destroy()
         
         if filepath.endswith(".webp"):
             webp_image = Image.open(filepath)
@@ -449,6 +465,8 @@ class Main():
             self.print_current_plugins(plugins)
             
             # Z10 user account
+            username = ""
+            password = ""
             if Z10Website in plugins:
                 reset_screen(heading="Z10 Benutzerkonto")
                 username, password = self.get_Z10_credetials(plugins)
@@ -477,7 +495,7 @@ class Main():
             
             # Image and link path / uri
             reset_screen(heading="Bild und Link")
-            bild, image_to_delete = self.get_bild()
+            bild = self.get_bild()
             link = self.get_link()
         except KeyboardInterrupt:
             print("\n\nProgramm wird beendet. Die Veranstaltung wurde nicht veröffentlicht.\n")
@@ -533,7 +551,7 @@ class Main():
             input("\n# Beende das Programm mit <Enter>: \n> ")
             driver.quit()
             try:
-                remove(image_to_delete)
+                remove(self.image_to_delete)
             except:
                 pass
         except KeyboardInterrupt:
