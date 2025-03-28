@@ -1,12 +1,13 @@
 from datetime import datetime
 from datetime import timedelta
-from os import environ
 from PIL import ImageTk, Image
 from PyQt6.QtWidgets import QFileDialog, QApplication
 from sys import exit, argv
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
+from os import listdir, getcwd, path, makedirs
+import yaml
 
 from helper import Veranstaltungsdetails
 from typing import TYPE_CHECKING
@@ -33,38 +34,86 @@ class MainWindow():
         # Start maximized
         w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d+0+0" % (w, h))
-
-        # Notebook, wich contains all the functionality of the program
-        self.tabs = ttk.Notebook(self.root)
-        self.tabs.pack(padx=5, pady=5, expand=True, fill=BOTH)
-
-        # The main-menu frame
-        frame = ttk.Frame(self.tabs)
-        frame.pack(padx=5, pady=5)
-        self.tabs.add(frame, text="Hauptmenü")
-
-        # A frame with for the buttons linking to the tabs
-        self.buttonFrame = ttk.Frame(frame)
-        self.buttonFrame.place(relx=0.5, rely=0.5, anchor=CENTER)
+        
+        self.frames: list[Page] = []
+        
+    def focus(self, id):
+        frame = self.frames[id]
+        frame.focus()
     
-    def quit_program(self):
+    def quit_program(self, _):
         self.root.destroy()
-
-class MenuItem():
-    def __init__(self, notebook: ttk.Notebook, buttonFrame: ttk.Frame, friendlyName: str) -> None:
-
-        self.frame = ttk.Frame(notebook)
-        self.frame.pack(padx=5, pady=5, expand=True, fill=BOTH)
-        notebook.add(self.frame, text=friendlyName)
-
-        menuButton = ttk.Button(buttonFrame, text=friendlyName, command=lambda: notebook.select(self.frame))
-        menuButton.pack(padx=5, pady=5)
         
-        self.content()
+class Page():
+    def __init__(self, main_window: MainWindow, friendly_name: str) -> None:
         
-    def content(self):
+        print(main_window)
+        self.id = len(main_window.frames)
+        main_window.frames.append(self)
+        
+        style=ttk.Style()
+        style.configure("new.TFrame", background="#ABABAB")
+
+        self.page_frame = ttk.Frame(main_window.root, style="new.TFrame")
+        self.page_frame.pack(side=TOP, fill=BOTH, expand=True)
+        
+        self.populate_content()
+        
+    def populate_content(self):
         pass
+
+class EventListPage(Page):
+    def __init__(self, main_window, friendly_name):
+        super().__init__(main_window, friendly_name)
     
+    def populate_content(self):
+        refresh_Button = ttk.Button(self.page_frame, text="Refresh", command=self.refresh)
+        refresh_Button.pack(side=TOP, anchor=W)
+        
+        self.table = ttk.Treeview(self.page_frame, columns=("start", "name", "path"))
+        self.table.column('#0', width=0, stretch=NO)
+        self.table.column('start', anchor=W, width=150)
+        self.table.column('name', anchor=W, width=200)
+        self.table.column('path', anchor=W, width=150)
+        
+        self.table.heading('#0', text='', anchor=W)
+        self.table.heading('start', text='Beginn', anchor=W)
+        self.table.heading('name', text='Name', anchor=W)
+        self.table.heading('path', text='Dateipfad', anchor=W)
+        
+        self.table.tag_configure('oddrow', background='#292929')
+        self.table.tag_configure('evenrow', background='#222222')
+
+        self.table.pack(side=TOP, fill=BOTH, expand=True)
+        
+        self.refresh()
+        
+    def refresh(self):
+        
+        
+        makedirs(getcwd() + "/events/", exist_ok=True)
+        
+        file_list = listdir(getcwd() + "/events")
+        
+        for i in self.table.get_children():
+            self.table.delete(i)
+        
+        for i in range(len(file_list)):
+            with open("events/" + file_list[i], "r") as file:
+                event_data = yaml.safe_load(file)
+                
+                formatted_data = [event_data["beginn"], event_data["name"], "events/" + file_list[i]]
+                
+                if i % 2 == 0:
+                    self.table.insert(parent='', index=i, values=formatted_data, tags=('evenrow',))
+                else:
+                    self.table.insert(parent='', index=i, values=formatted_data, tags=('oddrow',))
+                    
+    def publish(self):
+        print(self.table.selection())
+
+"""
+
 class NewEventMenu(MenuItem):
     def __init__(self, mainWindow: MainWindow) -> None:
         self.available_plugins = available_plugins
@@ -73,7 +122,7 @@ class NewEventMenu(MenuItem):
         notebook = mainWindow.tabs
         buttonFrame = mainWindow.buttonFrame
         
-        super().__init__(notebook, buttonFrame, friendlyName = "Event erstellen")
+        super().__init__(notebook, buttonFrame, friendly_name = "Event erstellen")
     
     def file_open_dialog(self, title: str, filetypes: str, directory: str = "") -> str:
     
@@ -101,7 +150,7 @@ class NewEventMenu(MenuItem):
         self.end_hours = ttk.IntVar()
         self.end_minutes = ttk.IntVar()
         self.location = ttk.StringVar()
-        self.street = ttk.StringVar()
+        self.sself.tablet = ttk.StringVar()
         self.zip = ttk.StringVar()
         self.city = ttk.StringVar()
         self.image_path = ttk.StringVar()
@@ -218,10 +267,10 @@ class NewEventMenu(MenuItem):
         address_frame = ttk.Frame(scrollFrame)
         address_frame.grid(row=7, column=1, sticky=EW)
         
-        ## Street
-        street_en = ttk.Entry(address_frame, textvariable=self.street)
-        street_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
-        self.street.set(Veranstaltungsdetails.STRASSE)
+        ## Sself.tablet
+        sself.tablet_en = ttk.Entry(address_frame, textvariable=self.sself.tablet)
+        sself.tablet_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
+        self.sself.tablet.set(Veranstaltungsdetails.STRASSE)
         
         ttk.Label(address_frame, text=", ").pack(pady=5, side=LEFT)
         
@@ -352,7 +401,7 @@ class NewEventMenu(MenuItem):
                                         BEGINN = datetime.strptime(self.start_entry.get() + self.start_hours + self.start_minutes, "%d.%m.%Y%-H%-M"),
                                         ENDE = datetime.strptime(self.end_entry.get() + self.end_hours + self.end_minutes, "%d.%m.%Y%-H%-M"),
                                         LOCATION = self.location.get(),
-                                        STRASSE = self.street.get(),
+                                        STRASSE = self.sself.tablet.get(),
                                         PLZ = self.zip.get(),
                                         STADT = self.city.get(),
                                         BILD_DATEIPFAD = self.image_path.get(),
@@ -362,7 +411,6 @@ class NewEventMenu(MenuItem):
         # Enter necessary login credentials
         credentials = Logindaten(Z10_USERNAME = self.z10_username.get(),
                                 Z10_PASSWORD = self.z10_password.get())
-        """
         # init driver    
         options = Options()
         options.add_argument("--disable-infobars")
@@ -399,11 +447,11 @@ class NewEventMenu(MenuItem):
             raise e
         
         driver.quit()
-"""
     
 class PublishEventMenu(MenuItem):
     def __init__(self, mainWindow: MainWindow, available_plugins: list) -> None:
         self.available_plugins = available_plugins
         self.mainWindow = mainWindow
         
-        super().__init__(notebook = mainWindow.tabs, buttonFrame = mainWindow.buttonFrame, friendlyName = "Event Hochladen")
+        super().__init__(notebook = mainWindow.tabs, buttonFrame = mainWindow.buttonFrame, friendly_name = "Event Hochladen")
+"""

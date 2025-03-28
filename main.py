@@ -23,7 +23,7 @@ parser.set_defaults(flag=True)
 args = parser.parse_args()
 
 # Auxiliary imports
-from gui import NewEventMenu, MainWindow, PublishEventMenu
+from gui import MainWindow, EventListPage
     
 # Plugin imports
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
@@ -51,12 +51,8 @@ available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10W
 #TODO: Add Z10 Login check
 
 if __name__ == "__main__":
+    main_window = MainWindow()
 
-    mainWindow = MainWindow()
+    eventListPage = EventListPage(main_window, "Liste")
 
-    newEventMenu = NewEventMenu(mainWindow)
-    pem = PublishEventMenu(mainWindow, available_plugins)
-
-    mainWindow.tabs.select(newEventMenu.frame) # Temporary for easier development
-
-    mainWindow.root.mainloop()
+    main_window.root.mainloop()
