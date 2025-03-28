@@ -73,4 +73,4 @@ def get_Logindaten():
         sys.exit(1)
         
 Logindaten = get_Logindaten()
-## End of ChatGPT Code
+## End of ChatGPT Codemain

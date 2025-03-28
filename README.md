@@ -8,7 +8,7 @@ Automatisiertes Veröffentlichen von Events auf einer Reihe von Platformen
 
 options:
   -h, --help          Zeige diese Hilfe und beende das Programm
-  -w, --not-headless  Ist diese Flagge gesetzt öffnet sich Firefox als
+  -w, --windowed  Ist diese Flagge gesetzt öffnet sich Firefox als
                       Fenster. Wenn nicht, läuft es nur im Hintergrund
 ```
 
@@ -70,10 +70,12 @@ all pip-requirements are listed in requirements_for_binary_conversion.txt. To in
 
 ### Currently fully working plugins:
 - Kalender Karlsruhe
-- Nebenan.de
 - StuWe
 - Z10 Website + Wiki
 - Venyoo
+
+### Currently not working plugins:
+- Nebenan.de
 
 ### How to add new Plugins:
 example with "Name" as plugin name:
