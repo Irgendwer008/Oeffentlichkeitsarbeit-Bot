@@ -1,16 +1,11 @@
-from datetime import datetime
-from datetime import timedelta
 from PIL import ImageTk, Image
-from PyQt6.QtWidgets import QFileDialog, QApplication
-from sys import exit, argv
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
-from os import listdir, getcwd, path, makedirs
-import yaml
 
-from helper import Veranstaltungsdetails
-from typing import TYPE_CHECKING
+from helper import my_dataclasses, validate_min_max, get_list_of_eventfilepaths, get_event, file_open_dialog, get_selected_events
+
+from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     # Import Logindaten only for type hinting (not at runtime)
     from credentials import Logindaten
@@ -35,7 +30,7 @@ class MainWindow():
         w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d+0+0" % (w, h))
         
-        self.frames: list[Page] = []
+        self.event_frames: list[ViewEventPage] = []
         
     def focus(self, id):
         frame = self.frames[id]
@@ -45,32 +40,45 @@ class MainWindow():
         self.root.destroy()
         
 class Page():
-    def __init__(self, main_window: MainWindow, friendly_name: str) -> None:
+    def __init__(self, main_window: MainWindow, friendly_name: str, side: Literal["left", "right", "top", "bottom"] = TOP) -> None:
         
-        print(main_window)
-        self.id = len(main_window.frames)
-        main_window.frames.append(self)
-        
-        style=ttk.Style()
-        style.configure("new.TFrame", background="#ABABAB")
+        self.main_window = main_window
 
-        self.page_frame = ttk.Frame(main_window.root, style="new.TFrame")
-        self.page_frame.pack(side=TOP, fill=BOTH, expand=True)
+        self.page_frame = ttk.Frame(main_window.root)
+        self.page_frame.pack(padx=5, pady=5, side=side, fill=BOTH, expand=True)
         
         self.populate_content()
         
     def populate_content(self):
         pass
 
-class EventListPage(Page):
-    def __init__(self, main_window, friendly_name):
+class ListEventsPage(Page):
+    def __init__(self, main_window, friendly_name: str = "Liste"):
         super().__init__(main_window, friendly_name)
     
     def populate_content(self):
-        refresh_Button = ttk.Button(self.page_frame, text="Refresh", command=self.refresh)
-        refresh_Button.pack(side=TOP, anchor=W)
+        button_frame = ttk.Frame(self.page_frame)
+        button_frame.pack(side=TOP, anchor=W)
+        
+        refresh_button = ttk.Button(button_frame, text="Aktualisieren", command=self.refresh)
+        refresh_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
+        
+        open_button = ttk.Button(button_frame, text="Öffnen", command=self.open)
+        open_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
+        
+        delete_button = ttk.Button(button_frame, text="Löschen", command=self.delete)
+        delete_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
+        
+        publish_button = ttk.Button(button_frame, text="Veröffentlichen", command=self.publish)
+        publish_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
+        
+        close_all_button = ttk.Button(button_frame, text="Alle Schließen", command=self.close_all)
+        close_all_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
         
         self.table = ttk.Treeview(self.page_frame, columns=("start", "name", "path"))
+        self.table.bind("<Double-1>", self.open)
+        self.table.bind("<Return>", self.open)
+        
         self.table.column('#0', width=0, stretch=NO)
         self.table.column('start', anchor=W, width=150)
         self.table.column('name', anchor=W, width=200)
@@ -89,28 +97,249 @@ class EventListPage(Page):
         self.refresh()
         
     def refresh(self):
-        
-        
-        makedirs(getcwd() + "/events/", exist_ok=True)
-        
-        file_list = listdir(getcwd() + "/events")
-        
         for i in self.table.get_children():
             self.table.delete(i)
         
+        file_list = get_list_of_eventfilepaths()
+                
         for i in range(len(file_list)):
-            with open("events/" + file_list[i], "r") as file:
-                event_data = yaml.safe_load(file)
+            event = get_event(file_list[i])
                 
-                formatted_data = [event_data["beginn"], event_data["name"], "events/" + file_list[i]]
-                
-                if i % 2 == 0:
-                    self.table.insert(parent='', index=i, values=formatted_data, tags=('evenrow',))
-                else:
-                    self.table.insert(parent='', index=i, values=formatted_data, tags=('oddrow',))
-                    
+            formatted_data = [event.BEGINN, event.NAME, file_list[i]]
+            
+            if i % 2 == 0:
+                self.table.insert(parent='', index=i, values=formatted_data, tags=('evenrow'))
+            else:
+                self.table.insert(parent='', index=i, values=formatted_data, tags=('oddrow'))
+        
+    def open(self, _ = None):
+        
+        for event in get_selected_events(self.table):            
+            ViewEventPage(self.main_window, event)
+    
+    def close_all(self):
+        for event_page in self.main_window.event_frames:
+            event_page.cancel()
+    
     def publish(self):
-        print(self.table.selection())
+        pass
+        #TODO
+    
+    def delete(self):
+        pass
+        #TODO
+
+class ViewEventPage(Page):
+    def __init__(self, main_window, event: my_dataclasses.Event, friendly_name: str = "Eventansicht"):
+        self.event = event
+        super().__init__(main_window, friendly_name, side=LEFT)
+        
+        self.main_window.event_frames.append(self)
+    
+    def populate_content(self):
+        # Init the necessary variables
+        self.plugins_list = [] # final form: [plugin module, is plugin used? var, plugin's category combobox]
+        for plugin in available_plugins:
+            self.plugins_list.append([plugin, ttk.BooleanVar(value=True), None])
+            
+        self.title = ttk.StringVar(value=self.event.NAME)
+        self.subtitle = ttk.StringVar(value=self.event.UNTERÜBERSCHRIFT)
+        self.description = self.event.BESCHREIBUNG
+        self.start_date = self.event.BEGINN
+        self.start_hours = ttk.IntVar(value=self.event.BEGINN.hour)
+        self.start_minutes = ttk.IntVar(value=self.event.BEGINN.minute)
+        self.end_date = self.event.ENDE
+        self.end_hours = ttk.IntVar(value=self.event.ENDE.hour)
+        self.end_minutes = ttk.IntVar(value=self.event.ENDE.minute)
+        self.location = ttk.StringVar(value=self.event.LOCATION)
+        self.street = ttk.StringVar(value=self.event.STRASSE)
+        self.zip = ttk.StringVar(value=self.event.PLZ)
+        self.city = ttk.StringVar(value=self.event.STADT)
+        self.image_path = ttk.StringVar(value=self.event.BILD_DATEIPFAD)
+        self.link = ttk.StringVar(value=self.event.LINK)
+        
+        # Scrollframe that contains all the elements
+        scrollFrame = ScrolledFrame(self.page_frame, autohide=True)
+        scrollFrame.pack(padx=5, pady=5, expand=True, fill=BOTH)
+        
+        ## Input Elements
+        
+        # Title
+        title_lbl = ttk.Label(scrollFrame, text="Titel")
+        title_lbl.grid(row=1, column=0, padx=5, pady=5, sticky=W)
+        title_en = ttk.Entry(scrollFrame, textvariable=self.title)
+        title_en.config(validate="focusout", validatecommand=(validate_min_max, "%P", title_en, 2, 5000))
+        title_en.grid(row=1, column=1, padx=5, pady=5, sticky=EW)
+        
+        # Subtitle
+        title_lbl = ttk.Label(scrollFrame, text="Unterüberschrift")
+        title_lbl.grid(row=2, column=0, padx=5, pady=5, sticky=W)
+        title_en = ttk.Entry(scrollFrame, textvariable=self.subtitle)
+        title_en.grid(row=2, column=1, padx=5, pady=5, sticky=EW)
+        
+        # Description
+        description_lbl = ttk.Label(scrollFrame, text="Beschreibung")
+        description_lbl.grid(row=3, column=0, padx=5, pady=10, sticky=NW)
+        description_txt = ttk.Text(scrollFrame, height=10)
+        description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
+        description_txt.insert("1.0", self.description)
+        
+        # Start
+        start_lbl = ttk.Label(scrollFrame, text="Veranstaltungsbeginn")
+        start_lbl.grid(row=4, column=0, padx=5, pady=5, sticky=W)
+        start_frame = ttk.Frame(scrollFrame)
+        start_frame.grid(row=4, column=1, sticky=W)
+        
+        ## Date
+        start_dateEntry = ttk.DateEntry(start_frame, firstweekday=0, dateformat="%d.%m.%Y", startdate=self.start_date)
+        start_dateEntry.pack(padx=5, pady=5, side=LEFT)
+
+        ## Hours
+        start_hours_spinbox = ttk.Spinbox(start_frame, from_=0, to=23, textvariable=self.start_hours, wrap=True, width=5)
+        start_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        
+        ## ":"
+        ttk.Label(start_frame, text=":").pack(padx=5, pady=5, side=LEFT)
+
+        ## Minutes
+        minutes_spinbox = ttk.Spinbox(start_frame, from_=0, to=59, textvariable=self.start_minutes, wrap=True, width=5)
+        minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        
+        ttk.Label(start_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
+        
+        # End
+        end_lbl = ttk.Label(scrollFrame, text="Veranstaltungsende")
+        end_lbl.grid(row=5, column=0, padx=5, pady=5, sticky=W)
+        end_frame = ttk.Frame(scrollFrame)
+        end_frame.grid(row=5, column=1, sticky=W)
+        
+        ## Date
+        end_dateEntry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y", startdate=self.end_date)
+        end_dateEntry.pack(padx=5, pady=5, side=LEFT)
+
+        ## Hours
+        end_hours_spinbox = ttk.Spinbox(end_frame, from_=0, to=23, textvariable=self.end_hours, wrap=True, width=5)
+        end_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        
+        ## ":"
+        ttk.Label(end_frame, text=":").pack(padx=5, pady=5, side=LEFT)
+
+        ## Minutes
+        end_minutes_spinbox = ttk.Spinbox(end_frame, from_=0, to=59, textvariable=self.end_minutes, wrap=True, width=5)
+        end_minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        
+        ttk.Label(end_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
+        
+        # Location Name
+        location_lbl = ttk.Label(scrollFrame, text="Veranstaltungsort")
+        location_lbl.grid(row=6, column=0, padx=5, pady=5, sticky=W)
+        location_en = ttk.Entry(scrollFrame, textvariable=self.location)
+        location_en.grid(row=6, column=1, padx=5, pady=5, sticky=EW)
+        
+        
+        # Address
+        location_lbl = ttk.Label(scrollFrame, text="Addresse")
+        location_lbl.grid(row=7, column=0, padx=5, pady=5, sticky=W)
+        address_frame = ttk.Frame(scrollFrame)
+        address_frame.grid(row=7, column=1, sticky=EW)
+        
+        ## Street
+        street_en = ttk.Entry(address_frame, textvariable=self.street)
+        street_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
+        
+        ttk.Label(address_frame, text=", ").pack(pady=5, side=LEFT)
+        
+        ## ZIP
+        zip_en = ttk.Entry(address_frame, textvariable=self.zip, width=5)
+        zip_en.pack(padx=5, pady=5, side=LEFT)
+        
+        ## City
+        city_en = ttk.Entry(address_frame, textvariable=self.city)
+        city_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
+        
+        
+        # Categories
+        categories_lbl = ttk.Label(scrollFrame, text="Kategorien")
+        categories_lbl.grid(row=8, column=0, padx=5, pady=10, sticky=NW)
+        categories_frame = ttk.Frame(scrollFrame)
+        categories_frame.grid(row=8, column=1, padx=5, pady=5, sticky=EW)
+        categories_frame.columnconfigure(1, weight=1)
+
+        for plugin_item in self.plugins_list:
+            if plugin_item[0].plugininfo.DEFAULTCATEGORY_KEY is not None:
+                categories_plugin_lbl = ttk.Label(categories_frame, text=plugin_item[0].plugininfo.FRIENDLYNAME + ": ")
+                categories_plugin_lbl.grid(row=self.plugins_list.index(plugin_item), column=0, padx=5, pady=(0, 5), sticky=W)
+                categories_plugin_cb = ttk.Combobox(categories_frame, state=READONLY)
+                categories_plugin_cb["values"] = list(plugin_item[0].plugininfo.KATEGORIEN.values())
+                categories_plugin_cb.current(list(plugin_item[0].plugininfo.KATEGORIEN.keys()).index(plugin_item[0].plugininfo.DEFAULTCATEGORY_KEY))
+                categories_plugin_cb.grid(row=self.plugins_list.index(plugin_item), column=1, padx=(5, 0), pady=(0, 5), sticky=EW)
+                plugin_item[2] = categories_plugin_cb
+        
+        # Image
+        image_lbl = ttk.Label(scrollFrame, text="Bild")
+        image_lbl.grid(row=9, column=0, padx=5, pady=5, sticky=NW)
+        image_frame = ttk.Frame(scrollFrame)
+        image_frame.grid(row=9, column=1, padx=5, pady=5, sticky=EW)
+        image_frame.columnconfigure(0, weight=1)
+        
+        image_lbl = ttk.Label(image_frame, textvariable=self.image_path, style="inverse-secondary")
+        image_lbl.grid(row=0, column=0, sticky=NSEW, padx=5)
+        
+        image_preview = ttk.Label(image_frame)
+        image_preview.grid(row=1, column=0, columnspan=2, sticky=W, padx=30, pady=30)
+        try:
+            img = Image.open(self.image_path.get())
+            img.thumbnail((400, 200))
+            img = ImageTk.PhotoImage(img)
+            image_preview.config(image=img)
+            image_preview.image = img # Necessary to keep image reference: https://web.archive.org/web/20201111190625/http://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+        except:
+            pass
+        
+        def get_event_image_file():
+            file_name = file_open_dialog("Bild öffnen", "Bilder (png oder jpg) (*.png *.jpg)")
+
+            if file_name:
+                img = Image.open(file_name)
+                img.thumbnail((400, 200))
+                img = ImageTk.PhotoImage(img)
+                image_preview.config(image=img)
+                image_preview.image = img # Necessary to keep image reference: https://web.archive.org/web/20201111190625/http://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+                self.image_path.set(file_name)
+                
+        image_btn = ttk.Button(image_frame, command=get_event_image_file, text="Datei auswählen")
+        image_btn.grid(row=0, column=1, sticky=E)
+        
+        # Link
+        link_lbl = ttk.Label(scrollFrame, text="Link")
+        link_lbl.grid(row=10, column=0, padx=5, pady=5, sticky=W)
+        link_en = ttk.Entry(scrollFrame, textvariable=self.link)
+        link_en.grid(row=10, column=1, padx=5, pady=5, sticky=EW)
+        self.link.set(self.event.LINK)
+        
+        # Continue Buttons Frame
+        continue_buttons_frame = ttk.Frame(self.page_frame)
+        continue_buttons_frame.pack(padx=5, pady=5, fill=X)
+        
+        cancel_btn = ttk.Button(continue_buttons_frame, text="Abbrechen", command=self.cancel)
+        cancel_btn.grid(row=0, column=0, padx=5, pady=5, sticky=NSEW)
+        
+        save_btn = ttk.Button(continue_buttons_frame, text="Speichern", command=self.save)
+        save_btn.grid(row=0, column=1, padx=5, pady=5, sticky=NSEW)
+        
+        publish_btn = ttk.Button(continue_buttons_frame, text="Veröffentlichen", command=self.publish)
+        publish_btn.grid(row=0, column=2, padx=5, pady=5, sticky=NSEW)
+    
+    def cancel(self):
+        self.page_frame.destroy()
+    
+    def save():
+        pass
+        #TODO
+    
+    def publish():
+        pass
+        #TODO
 
 """
 
@@ -197,7 +426,7 @@ class NewEventMenu(MenuItem):
         title_lbl.grid(row=2, column=0, padx=5, pady=5, sticky=W)
         title_en = ttk.Entry(scrollFrame, textvariable=self.subtitle)
         title_en.grid(row=2, column=1, padx=5, pady=5, sticky=EW)
-        self.subtitle.set(Veranstaltungsdetails.UNTERÜBERSCHRIFT)
+        self.subtitle.set(my_dataclasses.UNTERÜBERSCHRIFT)
         
         # Description
         description_lbl = ttk.Label(scrollFrame, text="Beschreibung")
@@ -258,7 +487,7 @@ class NewEventMenu(MenuItem):
         location_lbl.grid(row=6, column=0, padx=5, pady=5, sticky=W)
         location_en = ttk.Entry(scrollFrame, textvariable=self.location)
         location_en.grid(row=6, column=1, padx=5, pady=5, sticky=EW)
-        self.location.set(Veranstaltungsdetails.LOCATION)
+        self.location.set(my_dataclasses.LOCATION)
         
         
         # Address
@@ -270,19 +499,19 @@ class NewEventMenu(MenuItem):
         ## Sself.tablet
         sself.tablet_en = ttk.Entry(address_frame, textvariable=self.sself.tablet)
         sself.tablet_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
-        self.sself.tablet.set(Veranstaltungsdetails.STRASSE)
+        self.sself.tablet.set(my_dataclasses.STRASSE)
         
         ttk.Label(address_frame, text=", ").pack(pady=5, side=LEFT)
         
         ## ZIP
         zip_en = ttk.Entry(address_frame, textvariable=self.zip, width=5)
         zip_en.pack(padx=5, pady=5, side=LEFT)
-        self.zip.set(Veranstaltungsdetails.PLZ)
+        self.zip.set(my_dataclasses.PLZ)
         
         ## City
         city_en = ttk.Entry(address_frame, textvariable=self.city)
         city_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
-        self.city.set(Veranstaltungsdetails.STADT)
+        self.city.set(my_dataclasses.STADT)
         
         
         # Categories
@@ -335,7 +564,7 @@ class NewEventMenu(MenuItem):
         link_lbl.grid(row=10, column=0, padx=5, pady=5, sticky=W)
         link_en = ttk.Entry(scrollFrame, textvariable=self.link)
         link_en.grid(row=10, column=1, padx=5, pady=5, sticky=EW)
-        self.link.set(Veranstaltungsdetails.LINK)
+        self.link.set(my_dataclasses.LINK)
         
         # Confirm Button
         confirm_btn = ttk.Button(scrollFrame, text="Bestätigen", command=lambda: self.Z10_login())
@@ -395,7 +624,7 @@ class NewEventMenu(MenuItem):
                 selected_categories.append(list(pluginitem[0].plugininfo.KATEGORIEN.keys())[pluginitem[2].current()])
 
         # Set event details
-        details = Veranstaltungsdetails(NAME = self.title.get(), 
+        details = my_dataclasses(NAME = self.title.get(), 
                                         UNTERÜBERSCHRIFT = self.subtitle.get(),
                                         BESCHREIBUNG = self.description.get(),
                                         BEGINN = datetime.strptime(self.start_entry.get() + self.start_hours + self.start_minutes, "%d.%m.%Y%-H%-M"),

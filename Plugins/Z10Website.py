@@ -20,7 +20,8 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import Veranstaltungsdetails, PluginInfo, step 
+from helper import my_dataclasses, step
+from my_dataclasses import Event, PluginInfo
 
 plugininfo = PluginInfo(FRIENDLYNAME="Z10 Homepage + Wiki",
                         DEFAULTCATEGORY_KEY="5", # Set to None (not "None" :D), if this platform doesn't use categories
@@ -36,7 +37,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Z10 Homepage + Wiki",
                                     "13": "Theater"})
 
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Event, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get("https://admin.z10.info/termine/create")
     

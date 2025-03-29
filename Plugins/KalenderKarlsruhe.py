@@ -19,7 +19,8 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import Veranstaltungsdetails, PluginInfo, step 
+from helper import my_dataclasses, step
+from my_dataclasses import Event, PluginInfo
 
 plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
                         DEFAULTCATEGORY_KEY="1444", #Set to None (not "None" :D), if this platform doesn't use categories
@@ -33,7 +34,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Kalender Karlsruhe",
                          "6": "Stadtleben",
                          "14": "Sport"})
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Event, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get('https://kalender.karlsruhe.de/db/iface/termin-neu')
 

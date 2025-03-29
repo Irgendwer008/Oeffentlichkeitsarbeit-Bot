@@ -19,7 +19,8 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import Veranstaltungsdetails, PluginInfo, step
+from helper import my_dataclasses, step
+from my_dataclasses import Event, PluginInfo
 from Plugins import Z10Website
 
 plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
@@ -28,7 +29,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Venyoo",
 
 
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Event, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get("https://venyoo.de/home")
     

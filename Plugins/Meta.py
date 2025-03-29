@@ -23,13 +23,14 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import Veranstaltungsdetails, PluginInfo, step 
+from helper import my_dataclasses, step
+from my_dataclasses import Event, PluginInfo
 
 plugininfo = PluginInfo(FRIENDLYNAME="Meta Business Suite",
                         DEFAULTCATEGORY_KEY=None, # Set to None (not "None" :D), if this platform doesn't use categories
                         KATEGORIEN={})
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Event, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     driver.get('https://business.facebook.com/latest/home')
     

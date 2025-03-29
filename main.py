@@ -23,8 +23,8 @@ parser.set_defaults(flag=True)
 args = parser.parse_args()
 
 # Auxiliary imports
-from gui import MainWindow, EventListPage
-    
+from gui import MainWindow, ListEventsPage
+
 # Plugin imports
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
 import Plugins.Nebenande as Nebenande
@@ -53,6 +53,6 @@ available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10W
 if __name__ == "__main__":
     main_window = MainWindow()
 
-    eventListPage = EventListPage(main_window, "Liste")
+    eventListPage = ListEventsPage(main_window)
 
     main_window.root.mainloop()

@@ -20,7 +20,8 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import Veranstaltungsdetails, PluginInfo, step, round_nearest_30min
+from helper import my_dataclasses, step, round_nearest_30min
+from my_dataclasses import Event, PluginInfo
 
 plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
                         DEFAULTCATEGORY_KEY="2", # Set to None (not "None" :D), if this platform doesn't use categories
@@ -41,7 +42,7 @@ plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",
                          "14": "Ausflüge",
                          "15": "Sonstiges"})
 
-def run(details: Veranstaltungsdetails, credentials: Logindaten, plugins: list[str], driver: Firefox):
+def run(details: Event, credentials: Logindaten, plugins: list[str], driver: Firefox):
     
     step("Website öffnen")
     driver.get("https://gewerbe.nebenan.de/businesses/190915/feed")
