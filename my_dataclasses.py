@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 @dataclass
 class Event:
+    DATEIPFAD:str
     NAME: str 
     BESCHREIBUNG: str
     BEGINN: datetime

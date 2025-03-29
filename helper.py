@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from inspect import stack, getmodule
 import importlib.util
 import sys
-from os import listdir, getcwd, path, makedirs, environ
+from os import listdir, getcwd, path, makedirs, environ, remove
 from PyQt6.QtWidgets import QFileDialog, QApplication
 from yaml import safe_load
 from ttkbootstrap import Treeview
@@ -83,21 +83,22 @@ def get_list_of_eventfilepaths(relative_directory_path: str = "events/") -> list
 
 def get_event(filepath: str) -> my_dataclasses.Event:
     with open(filepath, "r") as file:
-        event_data = safe_load(file)
+        yaml_data = safe_load(file)
 
         new_event = my_dataclasses.Event(
-            NAME=event_data["name"],
-            BESCHREIBUNG=event_data["beschreibung"],
-            BEGINN=datetime.fromisoformat(event_data["beginn"]),
-            ENDE=datetime.fromisoformat(event_data["ende"]),
-            BILD_DATEIPFAD=event_data["bild_dateipfad"],
-            AUSGEWÄHLTE_KATEGORIE=event_data["ausgewählte_kategorie"],
-            UNTERÜBERSCHRIFT=event_data["unterüberschrift"],
-            LOCATION=event_data["veranstaltungsort"]["name"],
-            STRASSE=event_data["veranstaltungsort"]["strasse"],
-            PLZ=event_data["veranstaltungsort"]["plz"],
-            STADT=event_data["veranstaltungsort"]["stadt"],
-            LINK=event_data["veranstaltungsort"]["link"]
+            DATEIPFAD=filepath,
+            NAME=yaml_data["name"],
+            BESCHREIBUNG=yaml_data["beschreibung"],
+            BEGINN=datetime.fromisoformat(yaml_data["beginn"]),
+            ENDE=datetime.fromisoformat(yaml_data["ende"]),
+            BILD_DATEIPFAD=yaml_data["bild_dateipfad"],
+            AUSGEWÄHLTE_KATEGORIE=yaml_data["ausgewählte_kategorie"],
+            UNTERÜBERSCHRIFT=yaml_data["unterüberschrift"],
+            LOCATION=yaml_data["veranstaltungsort"]["name"],
+            STRASSE=yaml_data["veranstaltungsort"]["strasse"],
+            PLZ=yaml_data["veranstaltungsort"]["plz"],
+            STADT=yaml_data["veranstaltungsort"]["stadt"],
+            LINK=yaml_data["veranstaltungsort"]["link"]
         )
         
         return new_event
@@ -119,5 +120,10 @@ def get_selected_events(table: Treeview) -> list[my_dataclasses.Event]:
         results.append(get_event(table_item["values"][2]))
     
     return results
+
+def delete_file(filepath: str) -> None:
+    if path.isfile(filepath):
+        remove(filepath)
+    return
 
 Logindaten = get_Logindaten()

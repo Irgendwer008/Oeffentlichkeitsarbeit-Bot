@@ -2,8 +2,9 @@ from PIL import ImageTk, Image
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
+from ttkbootstrap.dialogs.dialogs import Messagebox
 
-from helper import my_dataclasses, validate_min_max, get_list_of_eventfilepaths, get_event, file_open_dialog, get_selected_events
+from helper import my_dataclasses, validate_min_max, get_list_of_eventfilepaths, get_event, file_open_dialog, get_selected_events, delete_file
 
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
@@ -31,6 +32,8 @@ class MainWindow():
         self.root.geometry("%dx%d+0+0" % (w, h))
         
         self.event_frames: list[ViewEventPage] = []
+        # Reference to events has to be kept so that their images stay in memory
+        self.events = []
         
     def focus(self, id):
         frame = self.frames[id]
@@ -58,41 +61,46 @@ class ListEventsPage(Page):
     
     def populate_content(self):
         button_frame = ttk.Frame(self.page_frame)
-        button_frame.pack(side=TOP, anchor=W)
+        button_frame.pack(side=TOP, anchor=W, pady=(0, 5))
         
         refresh_button = ttk.Button(button_frame, text="Aktualisieren", command=self.refresh)
         refresh_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
         
-        open_button = ttk.Button(button_frame, text="Öffnen", command=self.open)
+        open_button = ttk.Button(button_frame, text="Auswahl Öffnen", command=self.open)
         open_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
         
-        delete_button = ttk.Button(button_frame, text="Löschen", command=self.delete)
+        delete_button = ttk.Button(button_frame, text="Auswahl Löschen", command=self.delete)
         delete_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
         
-        publish_button = ttk.Button(button_frame, text="Veröffentlichen", command=self.publish)
+        publish_button = ttk.Button(button_frame, text="Auswahl Veröffentlichen", command=self.publish)
         publish_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
         
         close_all_button = ttk.Button(button_frame, text="Alle Schließen", command=self.close_all)
         close_all_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
         
-        self.table = ttk.Treeview(self.page_frame, columns=("start", "name", "path"))
+        style = ttk.Style()  
+        style.configure('Treeview', rowheight=50)  # increase height
+        
+        self.table = ttk.Treeview(self.page_frame, columns=("name", "start", "path", "image_path"), style="Treeview")
         self.table.bind("<Double-1>", self.open)
         self.table.bind("<Return>", self.open)
         
-        self.table.column('#0', width=0, stretch=NO)
-        self.table.column('start', anchor=W, width=150)
-        self.table.column('name', anchor=W, width=200)
-        self.table.column('path', anchor=W, width=150)
+        self.table.column('#0', width=75, stretch=NO)
+        self.table.column('name', anchor=W, width=100)
+        self.table.column('start', anchor=W, width=100)
+        self.table.column('path', anchor=W, width=500)
+        self.table.column('image_path', anchor=W, width=500)
         
         self.table.heading('#0', text='', anchor=W)
-        self.table.heading('start', text='Beginn', anchor=W)
         self.table.heading('name', text='Name', anchor=W)
+        self.table.heading('start', text='Beginn', anchor=W)
         self.table.heading('path', text='Dateipfad', anchor=W)
+        self.table.heading('image_path', text='Dateipfad Bild', anchor=W)
         
         self.table.tag_configure('oddrow', background='#292929')
         self.table.tag_configure('evenrow', background='#222222')
 
-        self.table.pack(side=TOP, fill=BOTH, expand=True)
+        self.table.pack(side=TOP, fill=BOTH, expand=True, padx=5)
         
         self.refresh()
         
@@ -100,20 +108,27 @@ class ListEventsPage(Page):
         for i in self.table.get_children():
             self.table.delete(i)
         
+        self.events = []
+        
         file_list = get_list_of_eventfilepaths()
                 
         for i in range(len(file_list)):
             event = get_event(file_list[i])
+            
+            self.main_window.events.append(event)
                 
-            formatted_data = [event.BEGINN, event.NAME, file_list[i]]
+            formatted_data = [event.NAME, event.BEGINN.strftime("%d.%m.%Y, %H:%M"), event.DATEIPFAD, event.BILD_DATEIPFAD]
+            
+            event.img = Image.open(event.BILD_DATEIPFAD)
+            event.img.thumbnail((50, 50))
+            event.img = ImageTk.PhotoImage(event.img)
             
             if i % 2 == 0:
-                self.table.insert(parent='', index=i, values=formatted_data, tags=('evenrow'))
+                self.table.insert(parent='', index="end", image=event.img, open=True, values=formatted_data, tags=('evenrow'))
             else:
-                self.table.insert(parent='', index=i, values=formatted_data, tags=('oddrow'))
+                self.table.insert(parent='', index="end", image=event.img, open=True, values=formatted_data, tags=('oddrow'))
         
     def open(self, _ = None):
-        
         for event in get_selected_events(self.table):            
             ViewEventPage(self.main_window, event)
     
@@ -126,8 +141,39 @@ class ListEventsPage(Page):
         #TODO
     
     def delete(self):
-        pass
-        #TODO
+        events = get_selected_events(self.table)
+        
+        number_of_events = len(events)
+        
+        if not number_of_events:
+            return
+        
+        message_string = "Sollen neben den Events selbst auch die Bild-Dateien von "
+        
+        if number_of_events > 0:
+            message_string += f"\"{events[0].NAME}\""
+        
+        if number_of_events > 1:
+            message_string += f", \"{events[1].NAME}\""
+        
+        if number_of_events > 2:
+            message_string += f", \"{events[2].NAME}\""
+        
+        if number_of_events > 3:
+            message_string += f" und {number_of_events - 3} weiteren Events von diesem PC gelöscht werden?"
+            
+        match Messagebox.yesnocancel(message_string, "Löschen Bestätigen"):
+            case "Yes":
+                for event in events:
+                    delete_file(event.BILD_DATEIPFAD)
+                    delete_file(event.DATEIPFAD)
+            case "No":
+                for event in events:
+                    delete_file(event.DATEIPFAD)
+        
+        self.refresh()
+        
+        return
 
 class ViewEventPage(Page):
     def __init__(self, main_window, event: my_dataclasses.Event, friendly_name: str = "Eventansicht"):
@@ -159,7 +205,7 @@ class ViewEventPage(Page):
         self.link = ttk.StringVar(value=self.event.LINK)
         
         # Scrollframe that contains all the elements
-        scrollFrame = ScrolledFrame(self.page_frame, autohide=True)
+        scrollFrame = ScrolledFrame(self.page_frame, autohide=True, height=self.main_window.root.winfo_height()*2/3)
         scrollFrame.pack(padx=5, pady=5, expand=True, fill=BOTH)
         
         ## Input Elements
