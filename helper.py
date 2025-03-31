@@ -103,12 +103,19 @@ def get_event(filepath: str) -> my_dataclasses.Event:
         
         return new_event
     
-def validate_min_max(input, widget, min, max):
-    if len(input) >= min and len(input <= max):
-        widget.configure(bootstyle = "success")
+def validate_length_min_max(input: str, min: int, max: int):
+    if len(input) >= int(min) and len(input) <= int(max):
         return True
     else:
-        widget.configure(bootstyle = "warning")
+        return False
+    
+def validate_int_min_max(input: str, min: int, max: int):
+    if not input.isnumeric():
+        return False
+    
+    if int(input) >= int(min) and int(input) <= int(max):
+        return True
+    else:
         return False
 
 def get_selected_events(table: Treeview) -> list[my_dataclasses.Event]:

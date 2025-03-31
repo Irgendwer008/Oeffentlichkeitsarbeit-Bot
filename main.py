@@ -47,8 +47,18 @@ available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10W
 #TODO: add argument implementation for credentials and image file
 #TODO: Note necessary website locales in README.md
 #TODO: Add python version check
+#TODO: Add PDF to PNG conversion
+# (https://stackoverflow.com/questions/69643954/converting-pdf-to-png-with-python-without-pdf2image)
+# GUI:
 #TODO: make all-plugins-button work
 #TODO: Add Z10 Login check
+#TODO: Add images to buttons
+#TODO: change paths from strings to pathlib objects
+#TODO: saving: write to YML files 
+# https://python.land/data-processing/python-yaml
+#TODO: check all event input fields for valid input
+#TODO: check if Image still exists before upload
+#TODO: is creating events in the past possible? if not, add validation check
 
 if __name__ == "__main__":
     main_window = MainWindow()

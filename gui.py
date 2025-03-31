@@ -1,10 +1,13 @@
+from datetime import datetime, timedelta
 from PIL import ImageTk, Image
+from tkinter.tix import Balloon
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
-from ttkbootstrap.dialogs.dialogs import Messagebox
+from ttkbootstrap.dialogs.dialogs import MessageDialog
+from ttkbootstrap.icons import Icon
 
-from helper import my_dataclasses, validate_min_max, get_list_of_eventfilepaths, get_event, file_open_dialog, get_selected_events, delete_file
+from helper import my_dataclasses, validate_length_min_max, validate_int_min_max, get_list_of_eventfilepaths, get_event, file_open_dialog, get_selected_events, delete_file
 
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
@@ -63,20 +66,12 @@ class ListEventsPage(Page):
         button_frame = ttk.Frame(self.page_frame)
         button_frame.pack(side=TOP, anchor=W, pady=(0, 5))
         
-        refresh_button = ttk.Button(button_frame, text="Aktualisieren", command=self.refresh)
-        refresh_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
-        
-        open_button = ttk.Button(button_frame, text="Auswahl Öffnen", command=self.open)
-        open_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
-        
-        delete_button = ttk.Button(button_frame, text="Auswahl Löschen", command=self.delete)
-        delete_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
-        
-        publish_button = ttk.Button(button_frame, text="Auswahl Veröffentlichen", command=self.publish)
-        publish_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
-        
-        close_all_button = ttk.Button(button_frame, text="Alle Schließen", command=self.close_all)
-        close_all_button.pack(side=LEFT, padx=5, pady=5, anchor=W)
+        self.refresh_button = IconButton(button_frame, text="Aktualisieren", file="icons/arrow-clockwise.png", command=self.refresh)
+        self.open_button = IconButton(button_frame, text="Auswahl Öffnen", file="icons/pencil-square.png", command=self.open)
+        self.self_button = IconButton(button_frame, text="Neues Event", file="icons/calendar-plus.png", command=self.new)
+        self.delete_button = IconButton(button_frame, text="Auswahl Löschen", file="icons/trash-fill.png", command=self.delete)
+        self.close_all_button = IconButton(button_frame, text="Alle Ansichten Schließen", file="icons/window-x.png", command=self.close_all)
+        self.publish_button = IconButton(button_frame, text="Auswahl Veröffentlichen", file="icons/upload.png", command=self.publish)
         
         style = ttk.Style()  
         style.configure('Treeview', rowheight=50)  # increase height
@@ -127,7 +122,30 @@ class ListEventsPage(Page):
                 self.table.insert(parent='', index="end", image=event.img, open=True, values=formatted_data, tags=('evenrow'))
             else:
                 self.table.insert(parent='', index="end", image=event.img, open=True, values=formatted_data, tags=('oddrow'))
+
+    def new(self):
+        now = datetime.now()
+        begin = datetime(now.year, now.month, now.day, now.hour, 0, 0)
+        end = datetime(
+            now.year,
+            now.month,
+            now.day if now.hour + 1 < 24 else now.day + 1,
+            now.hour + 1 if now.hour + 1 < 24 else now.hour - 22,
+            0,
+            0)
         
+        new_event = my_dataclasses.Event(
+            DATEIPFAD=None,
+            NAME="",
+            BESCHREIBUNG="",
+            BEGINN=begin,
+            ENDE=end,
+            BILD_DATEIPFAD=None,
+            AUSGEWÄHLTE_KATEGORIE=None
+        )
+        
+        ViewEventPage(self.main_window, new_event)
+
     def open(self, _ = None):
         for event in get_selected_events(self.table):            
             ViewEventPage(self.main_window, event)
@@ -148,26 +166,23 @@ class ListEventsPage(Page):
         if not number_of_events:
             return
         
-        message_string = "Sollen neben den Events selbst auch die Bild-Dateien von "
+        message_string = ""
         
-        if number_of_events > 0:
-            message_string += f"\"{events[0].NAME}\""
-        
-        if number_of_events > 1:
-            message_string += f", \"{events[1].NAME}\""
-        
-        if number_of_events > 2:
-            message_string += f", \"{events[2].NAME}\""
-        
-        if number_of_events > 3:
-            message_string += f" und {number_of_events - 3} weiteren Events von diesem PC gelöscht werden?"
+        if number_of_events == 1:
+            message_string += f"Sollen neben dem Event \"{events[0].NAME}\" auch dessen Bild-Datei von diesem PC gelöscht werden?"
+        elif number_of_events == 2:
+            message_string += f"Sollen neben den Events \"{events[0].NAME}\" und \"{events[1].NAME}\" auch deren Bild-Dateien von diesem PC gelöscht werden?"
+        elif number_of_events == 3:
+            message_string += f"Sollen neben den Events \"{events[0].NAME}\", \"{events[1].NAME}\" und \"{events[2].NAME}\" auch deren Bild-Dateien von diesem PC gelöscht werden?"
+        else:
+            message_string += f"Sollen neben den Events \"{events[0].NAME}\", \"{events[1].NAME}\" und \"{events[2].NAME}\" und {number_of_events - 3} weiteren auch deren Bild-Dateien von diesem PC gelöscht werden?"
             
-        match Messagebox.yesnocancel(message_string, "Löschen Bestätigen"):
-            case "Yes":
+        match MessageDialog(message_string, "Löschen Bestätigen", buttons=["Abbrechen", "Nur Eventdateien:primary", "Events und Bilder"], icon=Icon.warning).show():
+            case "Events und Bilder":
                 for event in events:
                     delete_file(event.BILD_DATEIPFAD)
                     delete_file(event.DATEIPFAD)
-            case "No":
+            case "Nur Eventdateien":
                 for event in events:
                     delete_file(event.DATEIPFAD)
         
@@ -179,6 +194,7 @@ class ViewEventPage(Page):
     def __init__(self, main_window, event: my_dataclasses.Event, friendly_name: str = "Eventansicht"):
         self.event = event
         super().__init__(main_window, friendly_name, side=LEFT)
+        self.page_frame.configure(height=self.main_window.root.winfo_height()*2/3)
         
         self.main_window.event_frames.append(self)
     
@@ -204,8 +220,11 @@ class ViewEventPage(Page):
         self.image_path = ttk.StringVar(value=self.event.BILD_DATEIPFAD)
         self.link = ttk.StringVar(value=self.event.LINK)
         
+        registered_validate_length_min_max = self.main_window.root.register(validate_length_min_max)
+        registered_validate_int_min_max = self.main_window.root.register(validate_int_min_max)
+        
         # Scrollframe that contains all the elements
-        scrollFrame = ScrolledFrame(self.page_frame, autohide=True, height=self.main_window.root.winfo_height()*2/3)
+        scrollFrame = ScrolledFrame(self.page_frame, autohide=True)
         scrollFrame.pack(padx=5, pady=5, expand=True, fill=BOTH)
         
         ## Input Elements
@@ -214,14 +233,15 @@ class ViewEventPage(Page):
         title_lbl = ttk.Label(scrollFrame, text="Titel")
         title_lbl.grid(row=1, column=0, padx=5, pady=5, sticky=W)
         title_en = ttk.Entry(scrollFrame, textvariable=self.title)
-        title_en.config(validate="focusout", validatecommand=(validate_min_max, "%P", title_en, 2, 5000))
         title_en.grid(row=1, column=1, padx=5, pady=5, sticky=EW)
+        title_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 60))
         
         # Subtitle
-        title_lbl = ttk.Label(scrollFrame, text="Unterüberschrift")
-        title_lbl.grid(row=2, column=0, padx=5, pady=5, sticky=W)
-        title_en = ttk.Entry(scrollFrame, textvariable=self.subtitle)
-        title_en.grid(row=2, column=1, padx=5, pady=5, sticky=EW)
+        subtitle_lbl = ttk.Label(scrollFrame, text="Unterüberschrift")
+        subtitle_lbl.grid(row=2, column=0, padx=5, pady=5, sticky=W)
+        subtitle_en = ttk.Entry(scrollFrame, textvariable=self.subtitle)
+        subtitle_en.grid(row=2, column=1, padx=5, pady=5, sticky=EW)
+        subtitle_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 60))
         
         # Description
         description_lbl = ttk.Label(scrollFrame, text="Beschreibung")
@@ -229,6 +249,7 @@ class ViewEventPage(Page):
         description_txt = ttk.Text(scrollFrame, height=10)
         description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
         description_txt.insert("1.0", self.description)
+        title_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 5000))
         
         # Start
         start_lbl = ttk.Label(scrollFrame, text="Veranstaltungsbeginn")
@@ -243,13 +264,15 @@ class ViewEventPage(Page):
         ## Hours
         start_hours_spinbox = ttk.Spinbox(start_frame, from_=0, to=23, textvariable=self.start_hours, wrap=True, width=5)
         start_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        start_hours_spinbox.config(validate="focusout", validatecommand=(registered_validate_int_min_max, "%P", 0, 23))
         
         ## ":"
         ttk.Label(start_frame, text=":").pack(padx=5, pady=5, side=LEFT)
 
         ## Minutes
-        minutes_spinbox = ttk.Spinbox(start_frame, from_=0, to=59, textvariable=self.start_minutes, wrap=True, width=5)
-        minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        start_minutes_spinbox = ttk.Spinbox(start_frame, from_=0, to=59, textvariable=self.start_minutes, wrap=True, width=5)
+        start_minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        start_minutes_spinbox.config(validate="focusout", validatecommand=(registered_validate_int_min_max, "%P", 0, 59))
         
         ttk.Label(start_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
         
@@ -266,6 +289,7 @@ class ViewEventPage(Page):
         ## Hours
         end_hours_spinbox = ttk.Spinbox(end_frame, from_=0, to=23, textvariable=self.end_hours, wrap=True, width=5)
         end_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        end_hours_spinbox.config(validate="focusout", validatecommand=(registered_validate_int_min_max, "%P", 0, 23))
         
         ## ":"
         ttk.Label(end_frame, text=":").pack(padx=5, pady=5, side=LEFT)
@@ -273,6 +297,7 @@ class ViewEventPage(Page):
         ## Minutes
         end_minutes_spinbox = ttk.Spinbox(end_frame, from_=0, to=59, textvariable=self.end_minutes, wrap=True, width=5)
         end_minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
+        end_minutes_spinbox.config(validate="focusout", validatecommand=(registered_validate_int_min_max, "%P", 0, 59))
         
         ttk.Label(end_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
         
@@ -281,6 +306,7 @@ class ViewEventPage(Page):
         location_lbl.grid(row=6, column=0, padx=5, pady=5, sticky=W)
         location_en = ttk.Entry(scrollFrame, textvariable=self.location)
         location_en.grid(row=6, column=1, padx=5, pady=5, sticky=EW)
+        location_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 100))
         
         
         # Address
@@ -292,16 +318,19 @@ class ViewEventPage(Page):
         ## Street
         street_en = ttk.Entry(address_frame, textvariable=self.street)
         street_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
+        street_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 60))
         
         ttk.Label(address_frame, text=", ").pack(pady=5, side=LEFT)
         
         ## ZIP
         zip_en = ttk.Entry(address_frame, textvariable=self.zip, width=5)
         zip_en.pack(padx=5, pady=5, side=LEFT)
+        zip_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 5, 5))
         
         ## City
         city_en = ttk.Entry(address_frame, textvariable=self.city)
         city_en.pack(padx=5, pady=5, side=LEFT, fill=X, expand=True)
+        city_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 60))
         
         
         # Categories
@@ -365,7 +394,7 @@ class ViewEventPage(Page):
         
         # Continue Buttons Frame
         continue_buttons_frame = ttk.Frame(self.page_frame)
-        continue_buttons_frame.pack(padx=5, pady=5, fill=X)
+        continue_buttons_frame.pack(padx=5, pady=5, fill=BOTH)
         
         cancel_btn = ttk.Button(continue_buttons_frame, text="Abbrechen", command=self.cancel)
         cancel_btn.grid(row=0, column=0, padx=5, pady=5, sticky=NSEW)
@@ -431,12 +460,12 @@ class NewEventMenu(MenuItem):
         self.image_path = ttk.StringVar()
         self.link = ttk.StringVar()
         
-        def validate_min_max(input, widget, min, max):
+        def validate_min_max(input, self.button, min, max):
             if len(input) >= min and len(input <= max):
-                widget.configure(bootstyle = SUCCESS)
+                self.button.configure(bootstyle = SUCCESS)
                 return True
             else:
-                widget.configure(bootstyle = WARNING)
+                self.button.configure(bootstyle = WARNING)
                 return False
                 
             
@@ -730,3 +759,10 @@ class PublishEventMenu(MenuItem):
         
         super().__init__(notebook = mainWindow.tabs, buttonFrame = mainWindow.buttonFrame, friendly_name = "Event Hochladen")
 """
+
+class IconButton():
+    def __init__(self, master, text: str, file: str, command, side: Literal["left", "right", "top", "bottom"]=LEFT):
+        self.master=master
+        self.image = ttk.PhotoImage(file=file).subsample(2, 2)
+        self.button = ttk.Button(master=master, text=text, image=self.image, command=command)
+        self.button.pack(side=side, padx=5, pady=5, anchor=W)
