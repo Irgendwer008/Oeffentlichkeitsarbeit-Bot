@@ -111,7 +111,7 @@ class ListEventsPage(Page):
         file_list = get_list_of_eventfilepaths()
                 
         for i in range(len(file_list)):
-            event = get_event(file_list[i])
+            event = get_event_from_path(file_list[i])
             
             self.main_window.events.append(event)
                 
@@ -128,7 +128,15 @@ class ListEventsPage(Page):
 
     def new(self):
         now = datetime.now()
-        begin = datetime(now.year, now.month, now.day, now.hour, 0, 0)
+        
+        begin = datetime(
+            now.year,
+            now.month,
+            now.day,
+            now.hour,
+            0,
+            0)
+        
         end = datetime(
             now.year,
             now.month,
@@ -207,12 +215,12 @@ class ViewEventPage(Page):
     def save(self):
         yaml_string = event_to_string(self.event)
         
-        proposed_filepath = Path(pathify_event(self.event))
+        proposed_filepath = pathify_event(self.event)
         
         if self.event.DATEIPFAD == None:
             for i in range(1, 100):
                 if proposed_filepath.exists():
-                    proposed_filepath = Path(pathify_event(self.event), i)
+                    proposed_filepath = pathify_event(self.event, i)
                 if i == 100:
                     return FileExistsError("File creation was not possible")
             self.event.DATEIPFAD = proposed_filepath

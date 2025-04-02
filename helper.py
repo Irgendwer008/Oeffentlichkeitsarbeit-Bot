@@ -3,6 +3,7 @@ from inspect import stack, getmodule
 import importlib.util
 import sys
 #from os import listdir, getcwd, path, makedirs, environ, remove
+from os import environ, remove
 from pathlib import Path
 from PyQt6.QtWidgets import QFileDialog, QApplication
 from yaml import safe_load
@@ -34,11 +35,15 @@ def step(text: str):
 ## Be advised: The following parts for dynamic import of the credentials module where written by ChatGPT
 def get_Logindaten():
     # Get paths
-    base_path = path.dirname(sys.executable) if getattr(sys, 'frozen', False) else path.dirname(path.abspath(__file__))
-    credentials_path = path.join(base_path, 'credentials.py')
+    if getattr(sys, 'frozen', False):
+        base_path = Path(sys.executable).parent
+    else:
+        base_path = Path(__file__).resolve().parent
+        
+    credentials_path = base_path / Path("credentials.py")
 
     # Dynamically load credentials.py if it exists
-    if path.exists(credentials_path):
+    if Path.exists(credentials_path):
         spec = importlib.util.spec_from_file_location('credentials', credentials_path)
         credentials = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(credentials)
@@ -68,22 +73,23 @@ def file_open_dialog(title: str, filetypes: str, directory: str = "") -> str:
         
         return file_name
 
-def get_list_of_eventfilepaths(relative_directory_path: str = "events/") -> list[str]:
+def get_list_of_eventfilepaths(events_directory_path: Path = Path("events")) -> list[Path]:
     
-    directory_path = getcwd() + "/" + relative_directory_path
+    directory_path = Path.cwd() / events_directory_path
     
     # Create directory if it doesn't exist yet
-    makedirs(directory_path, exist_ok=True)
+    if events_directory_path.exists():
+        events_directory_path.mkdir()
     
-    full_path_list = []
+    path_list = []
     
-    for event_path in listdir(directory_path):
-        full_path_list.append(directory_path + event_path)
+    for event_path in directory_path.iterdir():
+        path_list.append(event_path)
     
-    return full_path_list
+    return path_list
 
-def get_event(filepath: str) -> Event:
-    with open(filepath, "r") as file:
+def get_event_from_path(filepath: Path) -> Event:
+    with open(filepath.resolve(), "r") as file:
         yaml_data = safe_load(file)
 
         new_event = Event(
@@ -92,7 +98,7 @@ def get_event(filepath: str) -> Event:
             BESCHREIBUNG=yaml_data["beschreibung"],
             BEGINN=datetime.fromisoformat(yaml_data["beginn"]),
             ENDE=datetime.fromisoformat(yaml_data["ende"]),
-            BILD_DATEIPFAD=yaml_data["bild_dateipfad"],
+            BILD_DATEIPFAD=Path(yaml_data["bild_dateipfad"]).resolve(),
             AUSGEWÄHLTE_KATEGORIE=yaml_data["ausgewählte_kategorie"],
             UNTERÜBERSCHRIFT=yaml_data["unterüberschrift"],
             LOCATION=yaml_data["veranstaltungsort"]["name"],
@@ -132,8 +138,8 @@ def pathify_event(event: Event, duplicatenumber: int = 0) -> Path:
         words.append(str(duplicatenumber))
         
     filename = "_".join(words)
-        
-    return Path.cwd() / Config.events_dir / Path(filename)
+    
+    return (Config.events_dir / Path(filename)).resolve()
     
 def validate_length_min_max(input: str, min: int, max: int):
     if len(input) >= int(min) and len(input) <= int(max):
@@ -156,13 +162,15 @@ def get_selected_events(table: Treeview) -> list[Event]:
     for focus_item in table.selection():
         table_item = table.item(focus_item)
         
-        results.append(get_event(table_item["values"][2]))
+        print(table_item)
+        
+        results.append(get_event_from_path(Path(table_item["values"][2])))
     
     return results
 
-def delete_file(filepath: str) -> None:
-    if path.isfile(filepath):
-        remove(filepath)
+def delete_file(filepath: Path) -> None:
+    if filepath.exists():
+        remove(filepath.resolve())
     return
 
 Logindaten = get_Logindaten()
