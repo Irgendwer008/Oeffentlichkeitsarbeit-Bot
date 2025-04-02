@@ -1,7 +1,6 @@
 from datetime import datetime
 from pathlib import Path
 from PIL import ImageTk, Image
-from tkinter.tix import Balloon
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
@@ -33,7 +32,7 @@ class MainWindow():
         self.root = ttk.Window(title="Z10 Autopublisher", themename="darkly")
         self.root.bind("<Control-q>", self.quit_program)
         
-        # Start maximized
+        # end maximized
         w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d+0+0" % (w, h))
         
@@ -61,7 +60,7 @@ class Page():
     def populate_content(self):
         pass
 
-class ListEventsPage(Page):
+class EventListPage(Page):
     def __init__(self, main_window, friendly_name: str = "Liste"):
         super().__init__(main_window, friendly_name)
     
@@ -79,19 +78,19 @@ class ListEventsPage(Page):
         style = ttk.Style()  
         style.configure('Treeview', rowheight=50)  # increase height
         
-        self.table = ttk.Treeview(self.page_frame, columns=("name", "start", "path", "image_path"), style="Treeview")
+        self.table = ttk.Treeview(self.page_frame, columns=("name", "end", "path", "image_path"), style="Treeview")
         self.table.bind("<Double-1>", self.open)
         self.table.bind("<Return>", self.open)
         
-        self.table.column('#0', width=75, stretch=NO)
+        self.table.column('#0', width=75, stretch=False)
         self.table.column('name', anchor=W, width=100)
-        self.table.column('start', anchor=W, width=100)
+        self.table.column('end', anchor=W, width=100)
         self.table.column('path', anchor=W, width=500)
         self.table.column('image_path', anchor=W, width=500)
         
         self.table.heading('#0', text='', anchor=W)
         self.table.heading('name', text='Name', anchor=W)
-        self.table.heading('start', text='Beginn', anchor=W)
+        self.table.heading('end', text='Beginn', anchor=W)
         self.table.heading('path', text='Dateipfad', anchor=W)
         self.table.heading('image_path', text='Dateipfad Bild', anchor=W)
         
@@ -155,11 +154,11 @@ class ListEventsPage(Page):
             AUSGEWÄHLTE_KATEGORIE=None
         )
         
-        ViewEventPage(self.main_window, new_event)
+        ViewEventPage(self.main_window, self, new_event)
 
     def open(self, _ = None):
         for event in get_selected_events(self.table):            
-            ViewEventPage(self.main_window, event)
+            ViewEventPage(self.main_window, self, event)
     
     def close_all(self):
         for event_page in self.main_window.event_frames:
@@ -202,8 +201,9 @@ class ListEventsPage(Page):
         return
 
 class ViewEventPage(Page):
-    def __init__(self, main_window, event: Event, friendly_name: str = "Eventansicht"):
+    def __init__(self, main_window, eventlistpage: EventListPage, event: Event, friendly_name: str = "Eventansicht"):
         self.event = event
+        self.eventlistpage = eventlistpage
         super().__init__(main_window, friendly_name, side=LEFT)
         self.page_frame.configure(height=self.main_window.root.winfo_height()*2/3)
         
@@ -213,7 +213,21 @@ class ViewEventPage(Page):
         self.page_frame.destroy()
     
     def save(self):
+        self.event.NAME = self.title.get()
+        self.event.UNTERÜBERSCHRIFT = self.subtitle.get()
+        self.event.BESCHREIBUNG = self.description_txt.get("1.0", END+"-1c").replace("\n\n", "\n\n\n")
+        self.event.BEGINN = datetime.strptime(f"{self.start_date.get()}_{self.start_hours.get()}_{self.end_minutes.get()}", "%d.%m.%Y_%H_%M")
+        self.event.ENDE = datetime.strptime(f"{self.end_date.get()}_{self.end_hours.get()}_{self.end_minutes.get()}", "%d.%m.%Y_%H_%M")
+        self.event.LOCATION = self.location.get()
+        self.event.STRASSE = self.street.get()
+        self.event.PLZ = self.zip.get()
+        self.event.STADT = self.city.get()
+        self.event.BILD_DATEIPFAD = Path(self.image_path.get()).resolve()
+        self.event.LINK = self.link.get()
+        
         yaml_string = event_to_string(self.event)
+        
+        print(yaml_string)
         
         proposed_filepath = pathify_event(self.event)
         
@@ -226,9 +240,12 @@ class ViewEventPage(Page):
             self.event.DATEIPFAD = proposed_filepath
         
         with open(self.event.DATEIPFAD, "w") as file:
-            dump(yaml_string, file)
+            dump(yaml_string, file, sort_keys=False)
         
-        Messagebox.show_info("Event erfolgreich gespeichert", "Speichern erfolgreich")
+        Messagebox.show_info("Event erfolgreich gespeichert", "Speichern erfolgreich", position = (500, 500))
+        
+        self.cancel()
+        self.eventlistpage.refresh()
     
     def publish():
         pass
@@ -243,10 +260,10 @@ class ViewEventPage(Page):
         self.title = ttk.StringVar(value=self.event.NAME)
         self.subtitle = ttk.StringVar(value=self.event.UNTERÜBERSCHRIFT)
         self.description = self.event.BESCHREIBUNG
-        self.start_date = self.event.BEGINN
+        self.start_date = ttk.StringVar(value=self.event.BEGINN.strftime("%d.%m.%Y"))
         self.start_hours = ttk.IntVar(value=self.event.BEGINN.hour)
         self.start_minutes = ttk.IntVar(value=self.event.BEGINN.minute)
-        self.end_date = self.event.ENDE
+        self.end_date = ttk.StringVar(value=self.event.ENDE.strftime("%d.%m.%Y"))
         self.end_hours = ttk.IntVar(value=self.event.ENDE.hour)
         self.end_minutes = ttk.IntVar(value=self.event.ENDE.minute)
         self.location = ttk.StringVar(value=self.event.LOCATION)
@@ -282,10 +299,9 @@ class ViewEventPage(Page):
         # Description
         description_lbl = ttk.Label(scrollFrame, text="Beschreibung")
         description_lbl.grid(row=3, column=0, padx=5, pady=10, sticky=NW)
-        description_txt = ttk.Text(scrollFrame, height=10)
-        description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
-        description_txt.insert("1.0", self.description)
-        title_en.config(validate="focusout", validatecommand=(registered_validate_length_min_max, "%P", 2, 5000))
+        self.description_txt = ttk.Text(scrollFrame, height=10)
+        self.description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
+        self.description_txt.insert("1.0", self.description)
         
         # Start
         start_lbl = ttk.Label(scrollFrame, text="Veranstaltungsbeginn")
@@ -294,10 +310,12 @@ class ViewEventPage(Page):
         start_frame.grid(row=4, column=1, sticky=W)
         
         ## Date
-        start_dateEntry = ttk.DateEntry(start_frame, firstweekday=0, dateformat="%d.%m.%Y", startdate=self.start_date)
+        start_dateEntry = ttk.DateEntry(start_frame, firstweekday=0, dateformat="%d.%m.%Y")
         start_dateEntry.pack(padx=5, pady=5, side=LEFT)
+        start_dateEntry.entry.configure(textvariable=self.start_date)
+        start_dateEntry.entry.configure(validatecommand=validate_date)
 
-        ## Hours
+        # Hours
         start_hours_spinbox = ttk.Spinbox(start_frame, from_=0, to=23, textvariable=self.start_hours, wrap=True, width=5)
         start_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
         start_hours_spinbox.config(validate="focusout", validatecommand=(registered_validate_int_min_max, "%P", 0, 23))
@@ -319,8 +337,10 @@ class ViewEventPage(Page):
         end_frame.grid(row=5, column=1, sticky=W)
         
         ## Date
-        end_dateEntry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y", startdate=self.end_date)
+        end_dateEntry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y")
         end_dateEntry.pack(padx=5, pady=5, side=LEFT)
+        end_dateEntry.entry.configure(textvariable=self.end_date)
+        end_dateEntry.entry.configure(validatecommand=validate_date)
 
         ## Hours
         end_hours_spinbox = ttk.Spinbox(end_frame, from_=0, to=23, textvariable=self.end_hours, wrap=True, width=5)
@@ -474,8 +494,8 @@ class NewEventMenu(MenuItem):
         self.title = ttk.StringVar()
         self.subtitle = ttk.StringVar()
         self.description = ttk.StringVar()
-        self.start_hours = ttk.IntVar()
-        self.start_minutes = ttk.IntVar()
+        self.end_hours = ttk.IntVar()
+        self.end_minutes = ttk.IntVar()
         self.end_hours = ttk.IntVar()
         self.end_minutes = ttk.IntVar()
         self.location = ttk.StringVar()
@@ -531,32 +551,32 @@ class NewEventMenu(MenuItem):
         # Description
         description_lbl = ttk.Label(scrollFrame, text="Beschreibung")
         description_lbl.grid(row=3, column=0, padx=5, pady=10, sticky=NW)
-        description_txt = ttk.Text(scrollFrame, height=10)
-        description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
+        self.description_txt = ttk.Text(scrollFrame, height=10)
+        self.description_txt.grid(row=3, column=1, padx=5, pady=5, sticky=EW)
         
-        # Start
-        start_lbl = ttk.Label(scrollFrame, text="Veranstaltungsbeginn")
-        start_lbl.grid(row=4, column=0, padx=5, pady=5, sticky=W)
-        start_frame = ttk.Frame(scrollFrame)
-        start_frame.grid(row=4, column=1, sticky=W)
+        # end
+        end_lbl = ttk.Label(scrollFrame, text="Veranstaltungsbeginn")
+        end_lbl.grid(row=4, column=0, padx=5, pady=5, sticky=W)
+        end_frame = ttk.Frame(scrollFrame)
+        end_frame.grid(row=4, column=1, sticky=W)
         
         ## Date
-        start_dateEntry = ttk.DateEntry(start_frame, firstweekday=0, dateformat="%d.%m.%Y")
-        start_dateEntry.pack(padx=5, pady=5, side=LEFT)
-        self.start_entry = start_dateEntry.entry
+        end_dateEntry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y")
+        end_dateEntry.pack(padx=5, pady=5, side=LEFT)
+        self.end_entry = end_dateEntry.entry
 
         ## Hours
-        start_hours_spinbox = ttk.Spinbox(start_frame, from_=0, to=23, textvariable=self.start_hours, wrap=True, width=5)
-        start_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
-        self.start_hours.set(20)
+        end_hours_spinbox = ttk.Spinbox(end_frame, from_=0, to=23, textvariable=self.end_hours, wrap=True, width=5)
+        end_hours_spinbox.pack(padx=5, pady=5, side=LEFT)
+        self.end_hours.set(20)
         
-        ttk.Label(start_frame, text=":").pack(padx=5, pady=5, side=LEFT)
+        ttk.Label(end_frame, text=":").pack(padx=5, pady=5, side=LEFT)
 
         ## Minutes
-        minutes_spinbox = ttk.Spinbox(start_frame, from_=0, to=59, textvariable=self.start_minutes, wrap=True, width=5)
+        minutes_spinbox = ttk.Spinbox(end_frame, from_=0, to=59, textvariable=self.end_minutes, wrap=True, width=5)
         minutes_spinbox.pack(padx=5, pady=5, side=LEFT)
         
-        ttk.Label(start_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
+        ttk.Label(end_frame, text="Uhr").pack(padx=5, pady=5, side=LEFT)
         
         # End
         end_lbl = ttk.Label(scrollFrame, text="Veranstaltungsende")
@@ -565,7 +585,7 @@ class NewEventMenu(MenuItem):
         end_frame.grid(row=5, column=1, sticky=W)
         
         ## Date
-        end_dateEntry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y", startdate=datetime.today() + timedelta(days=1))
+        end_dateEntry = ttk.DateEntry(end_frame, firstweekday=0, dateformat="%d.%m.%Y", enddate=datetime.today() + timedelta(days=1))
         end_dateEntry.pack(padx=5, pady=5, side=LEFT)
         self.end_entry = end_dateEntry.entry
 
@@ -727,7 +747,7 @@ class NewEventMenu(MenuItem):
         details = my_dataclasses(NAME = self.title.get(), 
                                         UNTERÜBERSCHRIFT = self.subtitle.get(),
                                         BESCHREIBUNG = self.description.get(),
-                                        BEGINN = datetime.strptime(self.start_entry.get() + self.start_hours + self.start_minutes, "%d.%m.%Y%-H%-M"),
+                                        BEGINN = datetime.strptime(self.end_entry.get() + self.end_hours + self.end_minutes, "%d.%m.%Y%-H%-M"),
                                         ENDE = datetime.strptime(self.end_entry.get() + self.end_hours + self.end_minutes, "%d.%m.%Y%-H%-M"),
                                         LOCATION = self.location.get(),
                                         STRASSE = self.sself.tablet.get(),

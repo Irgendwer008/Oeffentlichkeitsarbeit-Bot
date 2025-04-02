@@ -20,7 +20,7 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import my_dataclasses, step
+from helper import step
 from my_dataclasses import Event, PluginInfo
 
 plugininfo = PluginInfo(FRIENDLYNAME="Z10 Homepage + Wiki",

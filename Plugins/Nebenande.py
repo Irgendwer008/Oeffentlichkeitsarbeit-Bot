@@ -20,7 +20,7 @@ else:
     from helper import Logindaten
 
 # import helper functions
-from helper import my_dataclasses, step, round_nearest_30min
+from helper import step, round_nearest_30min
 from my_dataclasses import Event, PluginInfo
 
 plugininfo = PluginInfo(FRIENDLYNAME="Nebenan.de",

@@ -23,7 +23,7 @@ parser.set_defaults(flag=True)
 args = parser.parse_args()
 
 # Auxiliary imports
-from gui import MainWindow, ListEventsPage
+from gui import MainWindow, EventListPage
 
 # Plugin imports
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     
     main_window = MainWindow()
 
-    eventListPage = ListEventsPage(main_window)
+    eventListPage = EventListPage(main_window)
 
     main_window.root.mainloop()

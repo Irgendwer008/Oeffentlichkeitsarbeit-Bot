@@ -78,7 +78,7 @@ def get_list_of_eventfilepaths(events_directory_path: Path = Path("events")) -> 
     directory_path = Path.cwd() / events_directory_path
     
     # Create directory if it doesn't exist yet
-    if events_directory_path.exists():
+    if not events_directory_path.exists():
         events_directory_path.mkdir()
     
     path_list = []
@@ -99,8 +99,8 @@ def get_event_from_path(filepath: Path) -> Event:
             BEGINN=datetime.fromisoformat(yaml_data["beginn"]),
             ENDE=datetime.fromisoformat(yaml_data["ende"]),
             BILD_DATEIPFAD=Path(yaml_data["bild_dateipfad"]).resolve(),
-            AUSGEWÄHLTE_KATEGORIE=yaml_data["ausgewählte_kategorie"],
-            UNTERÜBERSCHRIFT=yaml_data["unterüberschrift"],
+            AUSGEWÄHLTE_KATEGORIE=yaml_data["ausgewaehlte_kategorie"],
+            UNTERÜBERSCHRIFT=yaml_data["unterueberschrift"],
             LOCATION=yaml_data["veranstaltungsort"]["name"],
             STRASSE=yaml_data["veranstaltungsort"]["strasse"],
             PLZ=yaml_data["veranstaltungsort"]["plz"],
@@ -112,18 +112,18 @@ def get_event_from_path(filepath: Path) -> Event:
 
 def event_to_string(event: Event) -> str:
     return safe_load(f"""
-        name: '{event.NAME.replace("'"), "\""}'
-beschreibung: '{event.BESCHREIBUNG.replace("'"), "\""}'
+name: '{event.NAME.replace("'", "\"")}'
+beschreibung: '{event.BESCHREIBUNG.replace("'", "\"")}'
 beginn: '{event.BEGINN.isoformat()}'
 ende: '{event.ENDE.isoformat()}'
 bild_dateipfad: '{event.BILD_DATEIPFAD}'
-ausgewählte_kategorie: null
-unterüberschrift: '{event.UNTERÜBERSCHRIFT}'
+ausgewaehlte_kategorie: null
+unterueberschrift: '{event.UNTERÜBERSCHRIFT}'
 veranstaltungsort: 
   name: '{event.LOCATION}'
-  strasse: '{event.LOCATION}'
-  plz: '{event.LOCATION}'
-  stadt: '{event.LOCATION}'
+  strasse: '{event.STRASSE}'
+  plz: '{event.PLZ}'
+  stadt: '{event.STADT}'
 link: '{event.LINK}'
         """)
 
@@ -156,13 +156,18 @@ def validate_int_min_max(input: str, min: int, max: int):
     else:
         return False
 
+def validate_date(input: str, format = "%d.%m.%Y"):
+    try:
+        datetime.strptime(input, format)
+        return True
+    except ValueError:
+        return False
+
 def get_selected_events(table: Treeview) -> list[Event]:
     results = []
     
     for focus_item in table.selection():
         table_item = table.item(focus_item)
-        
-        print(table_item)
         
         results.append(get_event_from_path(Path(table_item["values"][2])))
     
