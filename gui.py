@@ -1,13 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+from pathlib import Path
 from PIL import ImageTk, Image
 from tkinter.tix import Balloon
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
-from ttkbootstrap.dialogs.dialogs import MessageDialog
+from ttkbootstrap.dialogs.dialogs import MessageDialog, Messagebox
 from ttkbootstrap.icons import Icon
+from yaml import dump
 
-from helper import my_dataclasses, validate_length_min_max, validate_int_min_max, get_list_of_eventfilepaths, get_event, file_open_dialog, get_selected_events, delete_file
+from helper import *
+from my_dataclasses import Event, Config
 
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
@@ -134,7 +137,7 @@ class ListEventsPage(Page):
             0,
             0)
         
-        new_event = my_dataclasses.Event(
+        new_event = Event(
             DATEIPFAD=None,
             NAME="",
             BESCHREIBUNG="",
@@ -191,12 +194,37 @@ class ListEventsPage(Page):
         return
 
 class ViewEventPage(Page):
-    def __init__(self, main_window, event: my_dataclasses.Event, friendly_name: str = "Eventansicht"):
+    def __init__(self, main_window, event: Event, friendly_name: str = "Eventansicht"):
         self.event = event
         super().__init__(main_window, friendly_name, side=LEFT)
         self.page_frame.configure(height=self.main_window.root.winfo_height()*2/3)
         
         self.main_window.event_frames.append(self)
+    
+    def cancel(self):
+        self.page_frame.destroy()
+    
+    def save(self):
+        yaml_string = event_to_string(self.event)
+        
+        proposed_filepath = Path(pathify_event(self.event))
+        
+        if self.event.DATEIPFAD == None:
+            for i in range(1, 100):
+                if proposed_filepath.exists():
+                    proposed_filepath = Path(pathify_event(self.event), i)
+                if i == 100:
+                    return FileExistsError("File creation was not possible")
+            self.event.DATEIPFAD = proposed_filepath
+        
+        with open(self.event.DATEIPFAD, "w") as file:
+            dump(yaml_string, file)
+        
+        Messagebox.show_info("Event erfolgreich gespeichert", "Speichern erfolgreich")
+    
+    def publish():
+        pass
+        #TODO
     
     def populate_content(self):
         # Init the necessary variables
@@ -404,17 +432,6 @@ class ViewEventPage(Page):
         
         publish_btn = ttk.Button(continue_buttons_frame, text="Veröffentlichen", command=self.publish)
         publish_btn.grid(row=0, column=2, padx=5, pady=5, sticky=NSEW)
-    
-    def cancel(self):
-        self.page_frame.destroy()
-    
-    def save():
-        pass
-        #TODO
-    
-    def publish():
-        pass
-        #TODO
 
 """
 

@@ -54,13 +54,14 @@ available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10W
 #TODO: Add Z10 Login check
 #TODO: Add images to buttons
 #TODO: change paths from strings to pathlib objects
-#TODO: saving: write to YML files 
+#TODO: handle categories
 # https://python.land/data-processing/python-yaml
 #TODO: check all event input fields for valid input
 #TODO: check if Image still exists before upload
 #TODO: is creating events in the past possible? if not, add validation check
 
 if __name__ == "__main__":
+    
     main_window = MainWindow()
 
     eventListPage = ListEventsPage(main_window)

@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
 
 @dataclass
 class Event:
-    DATEIPFAD:str
+    DATEIPFAD: Path
     NAME: str 
     BESCHREIBUNG: str
     BEGINN: datetime
     ENDE: datetime
-    BILD_DATEIPFAD: str
+    BILD_DATEIPFAD: Path
     AUSGEWÄHLTE_KATEGORIE: list[str | None] # Number or None, if no category needed existant
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
     LOCATION: str = "Studentenzentrum Z10 e.V."
@@ -16,6 +17,10 @@ class Event:
     PLZ: str = "76131"
     STADT: str = "Karlsruhe"
     LINK: str = "https://z10.info"
+    
+@dataclass 
+class Config:
+    events_dir = Path("events")
 
 @dataclass
 class PluginInfo:
