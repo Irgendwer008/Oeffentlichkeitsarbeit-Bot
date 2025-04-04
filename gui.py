@@ -10,6 +10,7 @@ from yaml import dump
 
 from helper import *
 from my_dataclasses import Event, Config
+from publish import Publish
 
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from credentials import Logindaten
 else:
     from helper import Logindaten
-    
+
 # Plugin imports
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
 import Plugins.Nebenande as Nebenande
@@ -48,7 +49,7 @@ class MainWindow():
         self.root.destroy()
         
 class Page():
-    def __init__(self, main_window: MainWindow, friendly_name: str, side: Literal["left", "right", "top", "bottom"] = TOP) -> None:
+    def __init__(self, main_window: MainWindow, side: Literal["left", "right", "top", "bottom"] = TOP) -> None:
         
         self.main_window = main_window
 
@@ -61,9 +62,7 @@ class Page():
         pass
 
 class EventListPage(Page):
-    def __init__(self, main_window, friendly_name: str = "Liste"):
-        super().__init__(main_window, friendly_name)
-    
+
     def populate_content(self):
         button_frame = ttk.Frame(self.page_frame)
         button_frame.pack(side=TOP, anchor=W, pady=(0, 5))
@@ -201,10 +200,10 @@ class EventListPage(Page):
         return
 
 class ViewEventPage(Page):
-    def __init__(self, main_window, eventlistpage: EventListPage, event: Event, friendly_name: str = "Eventansicht"):
+    def __init__(self, main_window, eventlistpage: EventListPage, event: Event):
         self.event = event
         self.eventlistpage = eventlistpage
-        super().__init__(main_window, friendly_name, side=LEFT)
+        super().__init__(main_window, side=LEFT)
         self.page_frame.configure(height=self.main_window.root.winfo_height()*2/3)
         
         self.main_window.event_frames.append(self)
@@ -247,9 +246,8 @@ class ViewEventPage(Page):
         self.cancel()
         self.eventlistpage.refresh()
     
-    def publish():
-        pass
-        #TODO
+    def publish(self):
+        Publish(self.event)
     
     def populate_content(self):
         # Init the necessary variables

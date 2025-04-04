@@ -21,6 +21,9 @@ class Event:
 @dataclass 
 class Config:
     events_dir = Path("events")
+    nextcloud_url = "http://cloud.z10.whka.de"
+    nextcloud_autopublisher_path = "mitglieder/OB/Autopublisher/"
+    
 
 @dataclass
 class PluginInfo:
