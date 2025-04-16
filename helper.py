@@ -51,7 +51,6 @@ def get_Logindaten():
         # Access the Logindaten class from credentials.py
         if hasattr(credentials, 'Logindaten'):
             # Now you can use the variables/functions from credentials.py
-            print(f"Loaded credentials")
             return credentials.Logindaten  # Return reference to the Logindaten class
         else:
             raise ImportError("Logindaten class not found in credentials.py")
@@ -136,10 +135,10 @@ def pathify_event(event: Event, duplicatenumber: int = 0) -> Path:
     
     if duplicatenumber > 0:
         words.append(str(duplicatenumber))
-        
+           
     filename = "_".join(words)
     
-    return (Config.events_dir / Path(filename)).resolve()
+    return (Config.events_dir / Path(filename + ".yml")).resolve()
     
 def validate_length_min_max(input: str, min: int, max: int):
     if len(input) >= int(min) and len(input) <= int(max):
@@ -177,5 +176,13 @@ def delete_file(filepath: Path) -> None:
     if filepath.exists():
         remove(filepath.resolve())
     return
+
+def center_window_to_display(Screen, width: int, height: int):
+    """Centers the window to the main display/monitor"""
+    screen_width = Screen.winfo_screenwidth()
+    screen_height = Screen.winfo_screenheight()
+    x = int((screen_width/2) - (width/2))
+    y = int((screen_height/2) - (height/1.5))
+    return f"{width}x{height}+{x}+{y}"
 
 Logindaten = get_Logindaten()

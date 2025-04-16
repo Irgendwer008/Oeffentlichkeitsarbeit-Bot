@@ -6,18 +6,13 @@ from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import MessageDialog, Messagebox
 from ttkbootstrap.icons import Icon
+from types import ModuleType
 from yaml import dump
 
 from helper import *
-from my_dataclasses import Event, Config
-from publish import Publish
-
-from typing import TYPE_CHECKING, Literal
-if TYPE_CHECKING:
-    # Import Logindaten only for type hinting (not at runtime)
-    from credentials import Logindaten
-else:
-    from helper import Logindaten
+from my_dataclasses import Event
+from plugin_class import pluginclass_for_publishing
+from publish_handler import Publish
 
 # Plugin imports
 import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
@@ -25,7 +20,14 @@ import Plugins.Nebenande as Nebenande
 import Plugins.StuWe as StuWe
 import Plugins.Z10Website as Z10Website
 import Plugins.Venyoo as Venyoo
-available_plugins = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
+available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
+
+from typing import TYPE_CHECKING, Literal
+if TYPE_CHECKING:
+    # Import Logindaten only for type hinting (not at runtime)
+    from credentials import Logindaten
+else:
+    from helper import Logindaten
 
 class MainWindow():
     def __init__(self):
@@ -41,35 +43,38 @@ class MainWindow():
         # Reference to events has to be kept so that their images stay in memory
         self.events = []
         
+        self.list_frame = ttk.Frame(self.root)
+        self.view_frame = ttk.Frame(self.root)
+        
+        self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(1, weight=3)
+        
+        self.list_frame.pack(padx=5, pady=5, fill=BOTH)
+        self.view_frame.pack(padx=5, pady=5, fill=BOTH, expand=True)
+        
+        self.eventlist = EventList(self, self.list_frame)
+        
     def focus(self, id):
         frame = self.frames[id]
         frame.focus()
     
     def quit_program(self, _):
         self.root.destroy()
-        
-class Page():
-    def __init__(self, main_window: MainWindow, side: Literal["left", "right", "top", "bottom"] = TOP) -> None:
-        
+
+class EventList():
+    def __init__(self, main_window: MainWindow, frame: ttk.Frame):
         self.main_window = main_window
-
-        self.page_frame = ttk.Frame(main_window.root)
-        self.page_frame.pack(padx=5, pady=5, side=side, fill=BOTH, expand=True)
-        
+        self.frame = frame
         self.populate_content()
-        
-    def populate_content(self):
-        pass
-
-class EventListPage(Page):
 
     def populate_content(self):
-        button_frame = ttk.Frame(self.page_frame)
+        button_frame = ttk.Frame(self.frame)
         button_frame.pack(side=TOP, anchor=W, pady=(0, 5))
         
         self.refresh_button = IconButton(button_frame, text="Aktualisieren", file="icons/arrow-clockwise.png", command=self.refresh)
         self.open_button = IconButton(button_frame, text="Auswahl Öffnen", file="icons/pencil-square.png", command=self.open)
-        self.self_button = IconButton(button_frame, text="Neues Event", file="icons/calendar-plus.png", command=self.new)
+        self.new_button = IconButton(button_frame, text="Neues Event", file="icons/calendar-plus.png", command=self.new)
+        self.duplicate_button = IconButton(button_frame, text="Event Duplizieren", file="icons/copy.png", command=self.duplicate)
         self.delete_button = IconButton(button_frame, text="Auswahl Löschen", file="icons/trash-fill.png", command=self.delete)
         self.close_all_button = IconButton(button_frame, text="Alle Ansichten Schließen", file="icons/window-x.png", command=self.close_all)
         self.publish_button = IconButton(button_frame, text="Auswahl Veröffentlichen", file="icons/upload.png", command=self.publish)
@@ -77,7 +82,7 @@ class EventListPage(Page):
         style = ttk.Style()  
         style.configure('Treeview', rowheight=50)  # increase height
         
-        self.table = ttk.Treeview(self.page_frame, columns=("name", "end", "path", "image_path"), style="Treeview")
+        self.table = ttk.Treeview(self.frame, columns=("name", "end", "path", "image_path"), style="Treeview")
         self.table.bind("<Double-1>", self.open)
         self.table.bind("<Return>", self.open)
         
@@ -153,18 +158,41 @@ class EventListPage(Page):
             AUSGEWÄHLTE_KATEGORIE=None
         )
         
-        ViewEventPage(self.main_window, self, new_event)
+        ViewEventPage(self.main_window, self.main_window.view_frame, self, new_event)
 
     def open(self, _ = None):
-        for event in get_selected_events(self.table):            
-            ViewEventPage(self.main_window, self, event)
-    
+        selected = get_selected_events(self.table)
+        
+        if len(selected) == 0:
+            return
+        
+        for event in selected:
+            ViewEventPage(self.main_window, self.main_window.view_frame, self, event)
+
+    def duplicate(self):
+        
+        selected = get_selected_events(self.table)
+        
+        if len(selected) == 0:
+            return
+        elif len(selected) > 1:
+            Messagebox.show_info("Duplizieren von mehreren ausgewählten Events nicht möglich!", "Mehrfachauswahl ungültig")
+            return
+        else:
+            pass
+            #TODO
+
     def close_all(self):
         for event_page in self.main_window.event_frames:
             event_page.cancel()
     
     def publish(self):
-        pass
+        selected = get_selected_events(self.table)
+        
+        if len(selected) == 0:
+            return
+        
+        PublishEventWindow(self.main_window, selected)
         #TODO
     
     def delete(self):
@@ -185,8 +213,11 @@ class EventListPage(Page):
             message_string += f"Sollen neben den Events \"{events[0].NAME}\", \"{events[1].NAME}\" und \"{events[2].NAME}\" auch deren Bild-Dateien von diesem PC gelöscht werden?"
         else:
             message_string += f"Sollen neben den Events \"{events[0].NAME}\", \"{events[1].NAME}\" und \"{events[2].NAME}\" und {number_of_events - 3} weiteren auch deren Bild-Dateien von diesem PC gelöscht werden?"
-            
-        match MessageDialog(message_string, "Löschen Bestätigen", buttons=["Abbrechen", "Nur Eventdateien:primary", "Events und Bilder"], icon=Icon.warning).show():
+        
+        messagebox = MessageDialog(message_string, "Löschen Bestätigen", buttons=["Abbrechen", "Nur Eventdateien:primary", "Events und Bilder"], icon=Icon.warning)
+        messagebox.show()
+        
+        match messagebox.result:
             case "Events und Bilder":
                 for event in events:
                     delete_file(event.BILD_DATEIPFAD)
@@ -199,59 +230,22 @@ class EventListPage(Page):
         
         return
 
-class ViewEventPage(Page):
-    def __init__(self, main_window, eventlistpage: EventListPage, event: Event):
+class ViewEventPage():
+    def __init__(self, main_window: MainWindow, frame: ttk.Frame, eventlist: EventList, event: Event):
+        self.main_window = main_window
+        all_events_frame = frame
+        self.frame = ttk.Frame(all_events_frame)
+        self.frame.pack(padx=5, pady=5, side=LEFT, fill="both", expand=True)
         self.event = event
-        self.eventlistpage = eventlistpage
-        super().__init__(main_window, side=LEFT)
-        self.page_frame.configure(height=self.main_window.root.winfo_height()*2/3)
+        self.eventlist = eventlist
         
         self.main_window.event_frames.append(self)
-    
-    def cancel(self):
-        self.page_frame.destroy()
-    
-    def save(self):
-        self.event.NAME = self.title.get()
-        self.event.UNTERÜBERSCHRIFT = self.subtitle.get()
-        self.event.BESCHREIBUNG = self.description_txt.get("1.0", END+"-1c").replace("\n\n", "\n\n\n")
-        self.event.BEGINN = datetime.strptime(f"{self.start_date.get()}_{self.start_hours.get()}_{self.end_minutes.get()}", "%d.%m.%Y_%H_%M")
-        self.event.ENDE = datetime.strptime(f"{self.end_date.get()}_{self.end_hours.get()}_{self.end_minutes.get()}", "%d.%m.%Y_%H_%M")
-        self.event.LOCATION = self.location.get()
-        self.event.STRASSE = self.street.get()
-        self.event.PLZ = self.zip.get()
-        self.event.STADT = self.city.get()
-        self.event.BILD_DATEIPFAD = Path(self.image_path.get()).resolve()
-        self.event.LINK = self.link.get()
         
-        yaml_string = event_to_string(self.event)
-        
-        print(yaml_string)
-        
-        proposed_filepath = pathify_event(self.event)
-        
-        if self.event.DATEIPFAD == None:
-            for i in range(1, 100):
-                if proposed_filepath.exists():
-                    proposed_filepath = pathify_event(self.event, i)
-                if i == 100:
-                    return FileExistsError("File creation was not possible")
-            self.event.DATEIPFAD = proposed_filepath
-        
-        with open(self.event.DATEIPFAD, "w") as file:
-            dump(yaml_string, file, sort_keys=False)
-        
-        Messagebox.show_info("Event erfolgreich gespeichert", "Speichern erfolgreich", position = (500, 500))
-        
-        self.cancel()
-        self.eventlistpage.refresh()
-    
-    def publish(self):
-        Publish(self.event)
+        self.populate_content()
     
     def populate_content(self):
         # Init the necessary variables
-        self.plugins_list = [] # final form: [plugin module, is plugin used? var, plugin's category combobox]
+        self.plugins_list = [] # final form: [plugin module, plugin's category combobox] #TODO: update?!?
         for plugin in available_plugins:
             self.plugins_list.append([plugin, ttk.BooleanVar(value=True), None])
             
@@ -275,7 +269,7 @@ class ViewEventPage(Page):
         registered_validate_int_min_max = self.main_window.root.register(validate_int_min_max)
         
         # Scrollframe that contains all the elements
-        scrollFrame = ScrolledFrame(self.page_frame, autohide=True)
+        scrollFrame = ScrolledFrame(self.frame, autohide=True)
         scrollFrame.pack(padx=5, pady=5, expand=True, fill=BOTH)
         
         ## Input Elements
@@ -402,7 +396,7 @@ class ViewEventPage(Page):
                 categories_plugin_cb["values"] = list(plugin_item[0].plugininfo.KATEGORIEN.values())
                 categories_plugin_cb.current(list(plugin_item[0].plugininfo.KATEGORIEN.keys()).index(plugin_item[0].plugininfo.DEFAULTCATEGORY_KEY))
                 categories_plugin_cb.grid(row=self.plugins_list.index(plugin_item), column=1, padx=(5, 0), pady=(0, 5), sticky=EW)
-                plugin_item[2] = categories_plugin_cb
+                plugin_item[1] = categories_plugin_cb
         
         # Image
         image_lbl = ttk.Label(scrollFrame, text="Bild")
@@ -447,7 +441,7 @@ class ViewEventPage(Page):
         self.link.set(self.event.LINK)
         
         # Continue Buttons Frame
-        continue_buttons_frame = ttk.Frame(self.page_frame)
+        continue_buttons_frame = ttk.Frame(self.frame)
         continue_buttons_frame.pack(padx=5, pady=5, fill=BOTH)
         
         cancel_btn = ttk.Button(continue_buttons_frame, text="Abbrechen", command=self.cancel)
@@ -458,6 +452,50 @@ class ViewEventPage(Page):
         
         publish_btn = ttk.Button(continue_buttons_frame, text="Veröffentlichen", command=self.publish)
         publish_btn.grid(row=0, column=2, padx=5, pady=5, sticky=NSEW)
+    
+    def cancel(self):
+        self.frame.destroy()
+    
+    def save(self):
+        #TODO: categories
+        self.event.NAME = self.title.get()
+        self.event.UNTERÜBERSCHRIFT = self.subtitle.get()
+        self.event.BESCHREIBUNG = self.description_txt.get("1.0", END+"-1c").replace("\n\n", "\n\n\n")
+        self.event.BEGINN = datetime.strptime(f"{self.start_date.get()}_{self.start_hours.get()}_{self.end_minutes.get()}", "%d.%m.%Y_%H_%M")
+        self.event.ENDE = datetime.strptime(f"{self.end_date.get()}_{self.end_hours.get()}_{self.end_minutes.get()}", "%d.%m.%Y_%H_%M")
+        self.event.LOCATION = self.location.get()
+        self.event.STRASSE = self.street.get()
+        self.event.PLZ = self.zip.get()
+        self.event.STADT = self.city.get()
+        self.event.BILD_DATEIPFAD = Path(self.image_path.get()).resolve()
+        self.event.LINK = self.link.get()
+        
+        yaml_string = event_to_string(self.event)
+        
+        proposed_filepath = pathify_event(self.event)
+                
+        #TODO: Rework this check for old file paths as this probably doesn't work correctly        
+        if self.event.DATEIPFAD == None:
+            for i in range(1, 100):
+                if proposed_filepath.exists():
+                    proposed_filepath = pathify_event(self.event, i)
+                    break
+                if i == 100:
+                    return FileExistsError("File creation was not possible")
+        elif self.event.DATEIPFAD != proposed_filepath:
+            delete_file(self.event.DATEIPFAD)
+            self.event.DATEIPFAD = proposed_filepath
+        
+        with open(self.event.DATEIPFAD, "w") as file:
+            dump(yaml_string, file, sort_keys=False)
+        
+        Messagebox.show_info("Event erfolgreich gespeichert", "Speichern erfolgreich", position=(500, 500))
+        
+        self.cancel()
+        self.eventlist.refresh()
+    
+    def publish(self):
+        PublishEventWindow(self.main_window, [self.event])
 
 """
 
@@ -471,7 +509,7 @@ class NewEventMenu(MenuItem):
         
         super().__init__(notebook, buttonFrame, friendly_name = "Event erstellen")
     
-    def file_open_dialog(self, title: str, filetypes: str, directory: str = "") -> str:
+    def file_open_dialog(self, title: str, f^iletypes: str, directory: str = "") -> str:
     
         environ['QT_QPA_PLATFORM'] = 'xcb'
         qt_app = None
@@ -802,6 +840,123 @@ class PublishEventMenu(MenuItem):
         
         super().__init__(notebook = mainWindow.tabs, buttonFrame = mainWindow.buttonFrame, friendly_name = "Event Hochladen")
 """
+
+class PublishEventWindow():
+    def __init__(self, main_window: MainWindow, eventlist: list[Event]):
+        self.main_window = main_window
+        self.eventlist = eventlist
+
+        self.eventlist_window = ttk.Toplevel(title="Veröffentlichen")
+
+        # will launch a 900x400 window in the center of the main screen.
+        self.eventlist_window.geometry(center_window_to_display(self.eventlist_window, 900, 400))
+        
+        scrollFrame = ScrolledFrame(self.eventlist_window, autohide=True)
+        scrollFrame.pack(padx=5, pady=5, expand=True, fill=BOTH)
+        
+        # Show overview of Events to be published
+        style = ttk.Style()  
+        style.configure('Treeview', rowheight=50)  # increase height
+        
+        table = ttk.Treeview(scrollFrame, columns=("name", "start", "end"), style="Treeview")
+        table.pack(padx=5, pady=5, expand=True, fill=BOTH)
+        
+        table.column('#0', width=75, stretch=False)
+        table.column('name', anchor=W, width=100)
+        table.column('start', anchor=W, width=100)
+        table.column('end', anchor=W, width=100)
+
+        table.heading('#0', text='', anchor=W)
+        table.heading('name', text='Name', anchor=W)
+        table.heading('start', text='Beginn', anchor=W)
+        table.heading('end', text='End', anchor=W)
+
+        table.tag_configure('oddrow', background='#292929')
+        table.tag_configure('evenrow', background='#222222')
+        
+        for i in range(len(eventlist)):
+            formatted_data = [eventlist[i].NAME, eventlist[i].BEGINN.strftime("%d.%m.%Y %H:%M"), eventlist[i].ENDE.strftime("%d.%m.%Y %H:%M")]
+                 
+            if i % 2 == 0:
+                table.insert(parent='', index="end", open=True, values=formatted_data, tags=('evenrow'))
+            else:
+                table.insert(parent='', index="end", open=True, values=formatted_data, tags=('oddrow'))
+        
+        # Continue and cancel button
+        button_frame = ttk.Frame(self.eventlist_window)
+        button_frame.pack(padx=5, pady=5)
+        
+        continue_button = ttk.Button(button_frame, text="Bestätigen", command=self.plugin_selection)
+        continue_button.pack(padx=5, pady=5, side=LEFT)
+        
+        cancel_button = ttk.Button(button_frame, text="Abbrechen", command=self.cancel)
+        cancel_button.pack(padx=5, pady=5, side=LEFT)
+        
+    def plugin_selection(self):
+        self.pluginlist_window = ttk.Toplevel(title="Platformauswahl")
+        self.pluginlist_window.geometry(center_window_to_display(self.pluginlist_window, 600, 300))
+        
+        frame = ttk.Frame(self.pluginlist_window)
+        frame.pack(padx=5, pady=5, expand=True, fill=Y)
+        
+        self.check_all_bool = ttk.BooleanVar(value=True)
+        check_all = ttk.Checkbutton(frame, variable=self.check_all_bool, bootstyle="round-toggle", command=self.update_all)
+        check_all.grid(row=0, column=0)
+            
+        label_all = ttk.Label(frame, text="Alle")
+        label_all.grid(row=0, column=1, pady=10)
+        
+        self.plugins_list: list[pluginclass_for_publishing] = []
+        
+        for plugin in available_plugins:
+            plugininfo = plugin.plugininfo
+            
+            boolean_var = ttk.BooleanVar(value=True)
+            
+            checkbutton = ttk.Checkbutton(frame, bootstyle="success-round-toggle", variable=boolean_var)
+            checkbutton.grid(row=available_plugins.index(plugin) + 1, column=0, padx=5, pady=5)
+            
+            label = ttk.Label(frame, text=plugininfo.FRIENDLYNAME)
+            label.grid(row=available_plugins.index(plugin) + 1, column=1, sticky=NW, padx=5, pady=5)
+            
+            self.plugins_list.append(pluginclass_for_publishing(plugininfo, checkbutton, label, boolean_var))
+        
+        button_frame = ttk.Frame(self.pluginlist_window)
+        button_frame.pack(padx=5, pady=5, side=BOTTOM)
+            
+        ttk.Button(button_frame, text="Weiter", command=self.ask_confirmation).pack(padx=5, pady=5, side=LEFT)
+        ttk.Button(button_frame, text="Abbrechen", command=self.cancel).pack(padx=5, pady=5, side=LEFT)
+        
+    def ask_confirmation(self):
+        print("ask_cpnfirm")
+        messagebox = MessageDialog("Sollen diese Events wirklich veröffentlicht werden? Achtung, dies kann nicht (einfach) rückgängig gemacht werden!", "Veröffentlichen Bestätigen", buttons=["Abbrechen", "Zurück", "Veröffentlichung Ausführen:danger"], icon=Icon.warning)
+        messagebox.show()
+        
+        match messagebox.result:
+                case "Abbrechen":
+                    self.cancel()
+                case "Zurück":
+                    pass
+                case "Veröffentlichung Ausführen":
+                    for event in self.eventlist:
+                        Publish(event)
+    
+    def cancel(self):
+        print("cancel")
+        self.eventlist_window.destroy()
+        try:
+            self.pluginlist_window.destroy()
+        except AttributeError:
+            pass
+    
+    def update_all(self):
+        if self.check_all_bool.get():
+            for plugin_class in self.plugins_list:
+                plugin_class.booleanvar.set(True)
+        else:
+            for plugin_class in self.plugins_list:
+                plugin_class.booleanvar.set(False)
+        
 
 class IconButton():
     def __init__(self, master, text: str, file: str, command, side: Literal["left", "right", "top", "bottom"]=LEFT):

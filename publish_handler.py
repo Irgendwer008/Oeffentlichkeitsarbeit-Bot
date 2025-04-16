@@ -53,11 +53,6 @@ class Publish:
         
         return True
     
-    def get_credentials(_) -> Logindaten:
-        # Enter necessary login credentials
-        return Logindaten(Z10_USERNAME = "A",
-                          Z10_PASSWORD = "B")
-    
     def get_plugins(self):
         #TODO: update to gui version
         pass
