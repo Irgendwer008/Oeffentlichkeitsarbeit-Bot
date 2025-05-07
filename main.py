@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 
+from plugin import Plugin
+
+# Plugin imports
+import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
+#import Plugins.Nebenande as Nebenande
+#import Plugins.StuWe as StuWe
+#import Plugins.Z10Website as Z10Website
+#import Plugins.Venyoo as Venyoo
+available_plugins: list[Plugin] = [KalenderKarlsruhe.KalenderKarlsruhe()]
+
 import argparse
 from os import system
 from types import ModuleType
-from plugin import Plugin
 
 system("")
 
@@ -54,6 +63,6 @@ from gui import MainWindow
 
 if __name__ == "__main__":
     
-    main_window = MainWindow()
+    main_window = MainWindow(available_plugins)
 
     main_window.root.mainloop()

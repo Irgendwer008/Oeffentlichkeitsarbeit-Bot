@@ -7,20 +7,12 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import MessageDialog, Messagebox
 from ttkbootstrap.icons import Icon
 from types import ModuleType
-from yaml import dump
+from yaml import safe_dump
 
 from helper import *
 from my_dataclasses import Event
 from plugin import Plugin
 from publish import Publish
-
-# Plugin imports
-import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
-#import Plugins.Nebenande as Nebenande
-#import Plugins.StuWe as StuWe
-#import Plugins.Z10Website as Z10Website
-#import Plugins.Venyoo as Venyoo
-available_plugins: list[Plugin] = [KalenderKarlsruhe.KalenderKarlsruhe()]
 
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
@@ -30,7 +22,7 @@ else:
     from helper import Logindaten
 
 class MainWindow():
-    def __init__(self):
+    def __init__(self, available_plugins: list[Plugin]):
         # Main Window
         self.root = ttk.Window(title="Z10 Autopublisher", themename="darkly")
         self.root.bind("<Control-q>", self.quit_program)
@@ -38,6 +30,8 @@ class MainWindow():
         # end maximized
         w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d+0+0" % (w, h))
+        
+        self.available_plugins = available_plugins
         
         self.event_frames: list[ViewEventPage] = []
         # Reference to events has to be kept so that their images stay in memory
@@ -246,9 +240,7 @@ class ViewEventPage():
     
     def populate_content(self):
         # Init the necessary variables
-        self.plugins_list = [] # final form: [plugin module, plugin's category combobox] #TODO: update?!?
-        for plugin in available_plugins:
-            self.plugins_list.append([plugin, ttk.BooleanVar(value=True), None])
+        self.plugins_list: list[list[Plugin, ttk.Combobox]] = []
             
         self.title = ttk.StringVar(value=self.event.NAME)
         self.subtitle = ttk.StringVar(value=self.event.UNTERÜBERSCHRIFT)
@@ -388,6 +380,9 @@ class ViewEventPage():
         categories_frame = ttk.Frame(scrollFrame)
         categories_frame.grid(row=8, column=1, padx=5, pady=5, sticky=EW)
         categories_frame.columnconfigure(1, weight=1)
+        
+        for plugin in self.main_window.available_plugins:
+            self.plugins_list.append([plugin])
 
         for plugin_item in self.plugins_list:
             if plugin_item[0].plugininfo.DEFAULTCATEGORY_KEY is not None:
@@ -395,9 +390,17 @@ class ViewEventPage():
                 categories_plugin_lbl.grid(row=self.plugins_list.index(plugin_item), column=0, padx=5, pady=(0, 5), sticky=W)
                 categories_plugin_cb = ttk.Combobox(categories_frame, state=READONLY)
                 categories_plugin_cb["values"] = list(plugin_item[0].plugininfo.KATEGORIEN.values())
-                categories_plugin_cb.current(list(plugin_item[0].plugininfo.KATEGORIEN.keys()).index(plugin_item[0].plugininfo.DEFAULTCATEGORY_KEY))
+                # set default value
+                try:
+                    for plugin_category in self.event.AUSGEWÄHLTE_KATEGORIE:
+                        if plugin_category == plugin_item[0].plugininfo.FRIENDLYNAME:
+                            possible_categories = list(plugin_item[0].plugininfo.KATEGORIEN.values())
+                            selected_category = self.event.AUSGEWÄHLTE_KATEGORIE[plugin_category]
+                            categories_plugin_cb.current(possible_categories.index(selected_category))
+                except (TypeError, KeyError):
+                    categories_plugin_cb.current(list(plugin_item[0].plugininfo.KATEGORIEN.keys()).index(plugin_item[0].plugininfo.DEFAULTCATEGORY_KEY))
                 categories_plugin_cb.grid(row=self.plugins_list.index(plugin_item), column=1, padx=(5, 0), pady=(0, 5), sticky=EW)
-                plugin_item[1] = categories_plugin_cb
+                plugin_item.append(categories_plugin_cb)
         
         # Image
         image_lbl = ttk.Label(scrollFrame, text="Bild")
@@ -445,13 +448,13 @@ class ViewEventPage():
         continue_buttons_frame = ttk.Frame(self.frame)
         continue_buttons_frame.pack(padx=5, pady=5, fill=BOTH)
         
-        cancel_btn = ttk.Button(continue_buttons_frame, text="Abbrechen", command=self.cancel)
+        cancel_btn = ttk.Button(continue_buttons_frame, text="Abbrechen / Schließen", command=self.cancel)
         cancel_btn.grid(row=0, column=0, padx=5, pady=5, sticky=NSEW)
         
         save_btn = ttk.Button(continue_buttons_frame, text="Speichern", command=self.save)
         save_btn.grid(row=0, column=1, padx=5, pady=5, sticky=NSEW)
         
-        publish_btn = ttk.Button(continue_buttons_frame, text="Veröffentlichen", command=self.publish)
+        publish_btn = ttk.Button(continue_buttons_frame, text="Speichern & Veröffentlichen", command=self.publish)
         publish_btn.grid(row=0, column=2, padx=5, pady=5, sticky=NSEW)
     
     def cancel(self):
@@ -468,7 +471,11 @@ class ViewEventPage():
         self.event.STRASSE = self.street.get()
         self.event.PLZ = self.zip.get()
         self.event.STADT = self.city.get()
-        self.event.BILD_DATEIPFAD = Path(self.image_path.get()).resolve()
+        self.event.BILD_DATEIPFAD = Path(self.image_path.get()).resolve() 
+        categories = []
+        for [plugin, checkbox] in self.plugins_list:
+            categories.append([plugin.plugininfo.FRIENDLYNAME, checkbox.get()])
+        self.event.AUSGEWÄHLTE_KATEGORIE = categories
         self.event.LINK = self.link.get()
         
         yaml_string = event_to_string(self.event)
@@ -490,7 +497,7 @@ class ViewEventPage():
         self.event.DATEIPFAD = proposed_filepath
         
         with open(self.event.DATEIPFAD, "w") as file:
-            dump(yaml_string, file, sort_keys=False)
+            safe_dump(yaml_string, file, sort_keys=False)
         
         Messagebox.show_info("Event erfolgreich gespeichert", "Speichern erfolgreich", position=(500, 500))
         
@@ -498,6 +505,7 @@ class ViewEventPage():
         self.eventlist.refresh()
     
     def publish(self):
+        self.save()
         PublishEventProcess(self.main_window, [self.event])
 
 class PublishEventProcess():
@@ -506,9 +514,10 @@ class PublishEventProcess():
         self.eventlist = eventlist
 
         self.eventlist_window = ttk.Toplevel(title="Veröffentlichen")
+        self.eventlist_window.bind("<Control-q>", self.main_window.quit_program)
 
         # will launch a 900x400 window in the center of the main screen.
-        self.eventlist_window.geometry(center_window_to_display(self.eventlist_window, 900, 400))
+        #self.eventlist_window.geometry(center_window_to_display(self.eventlist_window, 900, 400))
         
         scrollFrame = ScrolledFrame(self.eventlist_window, autohide=True)
         scrollFrame.pack(padx=5, pady=5, expand=True, fill=BOTH)
@@ -530,13 +539,20 @@ class PublishEventProcess():
         table.tag_configure('oddrow', background='#292929')
         table.tag_configure('evenrow', background='#222222')
         
+        self.image_list = []
+        
         for i in range(len(eventlist)):
             formatted_data = [eventlist[i].NAME, eventlist[i].BEGINN.strftime("%d.%m.%Y %H:%M"), eventlist[i].ENDE.strftime("%d.%m.%Y %H:%M")]
+            
+            img = Image.open(eventlist[i].BILD_DATEIPFAD)
+            img.thumbnail((50, 50))
+            img = ImageTk.PhotoImage(img)
+            self.image_list.append(img) # keep reference to image
                  
             if i % 2 == 0:
-                table.insert(parent='', index="end", open=True, values=formatted_data, tags=('evenrow'))
+                table.insert(parent='', index="end", image=img, open=True, values=formatted_data, tags=('evenrow'))
             else:
-                table.insert(parent='', index="end", open=True, values=formatted_data, tags=('oddrow'))
+                table.insert(parent='', index="end", image=img, open=True, values=formatted_data, tags=('oddrow'))
         
         # Continue and cancel button
         button_frame = ttk.Frame(self.eventlist_window)
@@ -550,23 +566,24 @@ class PublishEventProcess():
         
     def run_plugin_selection(self):
         self.pluginlist_window = ttk.Toplevel(title="Platformauswahl")
-        self.pluginlist_window.geometry(center_window_to_display(self.pluginlist_window, 600, 300))
+        #self.pluginlist_window.geometry(center_window_to_display(self.pluginlist_window, 600, 300))
+        self.pluginlist_window.bind("<Control-q>", self.main_window.quit_program)
         
         self.plugin_selection_list: list[list[Plugin, ttk.Checkbutton, ttk.Label, ttk.BooleanVar]] = []
         
         frame = ttk.Frame(self.pluginlist_window)
         frame.pack(padx=5, pady=5, expand=True, fill=Y)
         
-        for plugin in available_plugins:
+        for plugin in self.main_window.available_plugins:
             plugininfo = plugin.plugininfo
             
             boolean_var = ttk.BooleanVar(value=True)
             
             checkbutton = ttk.Checkbutton(frame, bootstyle="success-round-toggle", variable=boolean_var)
-            checkbutton.grid(row=available_plugins.index(plugin) + 1, column=0, padx=5, pady=5)
+            checkbutton.grid(row=self.main_window.available_plugins.index(plugin) + 1, column=0, padx=5, pady=5)
             
             label = ttk.Label(frame, text=plugininfo.FRIENDLYNAME)
-            label.grid(row=available_plugins.index(plugin) + 1, column=1, sticky=NW, padx=5, pady=5)
+            label.grid(row=self.main_window.available_plugins.index(plugin) + 1, column=1, sticky=NW, padx=5, pady=5)
             
             self.plugin_selection_list.append([plugin, checkbutton, label, boolean_var])
         

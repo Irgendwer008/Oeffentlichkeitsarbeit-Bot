@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 import ttkbootstrap as ttk
 from my_dataclasses import Event
-from publish import Publish
 from selenium.webdriver import Firefox
 from typing import Literal
 
 # Adaptive import of credentials.py
 from typing import TYPE_CHECKING
+from publish import Publish
 if TYPE_CHECKING:
     # Import template Logindaten only for type hinting (not at runtime)
     from credentials import Logindaten
@@ -37,7 +37,7 @@ class Plugin():
         self.publisher.status_update(self, step, event)
         
     def error(self, event: Event | Literal["All"]):
-        pass
+        self.publisher.status_error(self, event)
     
     def success(self, event: Event | Literal["All"]):
-        pass
+        self.publisher.status_success(self, event)

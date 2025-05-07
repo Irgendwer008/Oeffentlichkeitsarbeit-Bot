@@ -10,7 +10,7 @@ class Event:
     BEGINN: datetime
     ENDE: datetime
     BILD_DATEIPFAD: Path
-    AUSGEWÄHLTE_KATEGORIE: list[str | None] # Number or None, if no category needed existant
+    AUSGEWÄHLTE_KATEGORIE: list[str, str] | None # dict of "plugin.FRIENDLYNAME: categorykey" or None, if no category needed existant
     UNTERÜBERSCHRIFT: str = "Eine Z10-e.V. Veranstaltung"
     LOCATION: str = "Studentenzentrum Z10 e.V."
     STRASSE: str = "Zähringerstraße 10"

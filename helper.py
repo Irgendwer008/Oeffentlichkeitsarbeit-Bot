@@ -88,6 +88,8 @@ def get_list_of_eventfilepaths(events_directory_path: Path = Path("events")) -> 
     return path_list
 
 def get_event_from_path(filepath: Path) -> Event:
+    from main import available_plugins # only do here to avioid circular import
+    
     with open(filepath.resolve(), "r") as file:
         yaml_data = safe_load(file)
 
@@ -98,7 +100,7 @@ def get_event_from_path(filepath: Path) -> Event:
             BEGINN=datetime.fromisoformat(yaml_data["beginn"]),
             ENDE=datetime.fromisoformat(yaml_data["ende"]),
             BILD_DATEIPFAD=Path(yaml_data["bild_dateipfad"]).resolve(),
-            AUSGEWÄHLTE_KATEGORIE=yaml_data["ausgewaehlte_kategorie"],
+            AUSGEWÄHLTE_KATEGORIE=yaml_data["ausgewaehlte_kategorie"] if yaml_data["ausgewaehlte_kategorie"] not in [None, "None"] else {plugin.plugininfo.FRIENDLYNAME: plugin.plugininfo.KATEGORIEN[plugin.plugininfo.DEFAULTCATEGORY_KEY] for plugin in available_plugins},
             UNTERÜBERSCHRIFT=yaml_data["unterueberschrift"],
             LOCATION=yaml_data["veranstaltungsort"]["name"],
             STRASSE=yaml_data["veranstaltungsort"]["strasse"],
@@ -116,7 +118,7 @@ beschreibung: '{event.BESCHREIBUNG.replace("'", "\"")}'
 beginn: '{event.BEGINN.isoformat()}'
 ende: '{event.ENDE.isoformat()}'
 bild_dateipfad: '{event.BILD_DATEIPFAD}'
-ausgewaehlte_kategorie: null
+ausgewaehlte_kategorie:{category_selection_to_string(event.AUSGEWÄHLTE_KATEGORIE)}
 unterueberschrift: '{event.UNTERÜBERSCHRIFT}'
 veranstaltungsort: 
   name: '{event.LOCATION}'
@@ -125,6 +127,17 @@ veranstaltungsort:
   stadt: '{event.STADT}'
 link: '{event.LINK}'
         """)
+
+def category_selection_to_string(categoryselection: list | None) -> str:
+    if categoryselection is None:
+        return "None"
+    
+    result = ""
+    
+    for plugin, category in categoryselection:
+        result += f"\n  '{plugin}': '{category}'"
+    
+    return result
 
 def pathify_event(event: Event, duplicatenumber: int = 0) -> Path:
     
