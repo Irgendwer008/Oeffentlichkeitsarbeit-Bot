@@ -1,6 +1,7 @@
 selenium>=4.25.0
 pwinput>=1.0.3
 ttkbootstrap>=1.10.1
-pyQt6>=13.8.0
+pyQt6
 pyyaml
-facebook_business
+pillow
+selenium

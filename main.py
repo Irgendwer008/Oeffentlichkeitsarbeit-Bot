@@ -3,6 +3,7 @@
 import argparse
 from os import system
 from types import ModuleType
+from plugin import Plugin
 
 system("")
 
@@ -24,16 +25,6 @@ args = parser.parse_args()
 
 # Auxiliary imports
 from gui import MainWindow
-
-# Plugin imports
-import Plugins.KalenderKarlsruhe as KalenderKarlsruhe
-import Plugins.Nebenande as Nebenande
-import Plugins.StuWe as StuWe
-import Plugins.Z10Website as Z10Website
-import Plugins.Venyoo as Venyoo
-available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10Website, Venyoo]
-
-
 
 #TODO: Check if events where published correctly (prob takes much time :,) )
 #TODO: try facebok-sdk (see link at top of Meta.py)
@@ -59,6 +50,7 @@ available_plugins: list[ModuleType] = [KalenderKarlsruhe, Nebenande, StuWe, Z10W
 #TODO: check all event input fields for valid input
 #TODO: check if Image still exists before upload
 #TODO: is creating events in the past possible? if not, add validation check
+#TODO: strip any leading or trailing spaces in text inputs
 
 if __name__ == "__main__":
     
