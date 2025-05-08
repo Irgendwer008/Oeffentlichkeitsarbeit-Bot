@@ -1,25 +1,18 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 from PIL import ImageTk, Image
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import MessageDialog, Messagebox
 from ttkbootstrap.icons import Icon
-from types import ModuleType
 from yaml import safe_dump
 
 from helper import *
 from my_dataclasses import Event
 from plugin import Plugin
 from publish import Publish
-
-from typing import TYPE_CHECKING, Literal
-if TYPE_CHECKING:
-    # Import Logindaten only for type hinting (not at runtime)
-    from credentials import Logindaten
-else:
-    from helper import Logindaten
 
 class MainWindow():
     def __init__(self, available_plugins: list[Plugin]):

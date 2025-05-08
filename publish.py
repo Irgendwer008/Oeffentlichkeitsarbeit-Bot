@@ -1,13 +1,10 @@
 from __future__ import annotations # to be able to avoid circular import of Plugin
 
-from io import BytesIO
 import threading
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from urllib.request import urlretrieve
 from typing import TYPE_CHECKING
 
 from credentials import Logindaten

@@ -12,7 +12,6 @@ available_plugins: list[Plugin] = [KalenderKarlsruhe.KalenderKarlsruhe()]
 
 import argparse
 from os import system
-from types import ModuleType
 
 system("")
 

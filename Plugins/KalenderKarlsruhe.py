@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-import sys
 import time
-import ttkbootstrap as ttk
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
